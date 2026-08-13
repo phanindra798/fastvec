@@ -1,0 +1,18 @@
+bin/
+*.test
+*.out
+*.prof
+
+# go build ./... drops binaries here. Leading slash matters, otherwise this
+# also matches the cmd/fastvec-bench/ directory and hides the source.
+/fastvec-bench
+/fastvec-build
+/fastvec-server
+
+# datasets go in /mnt/d/data, not in here
+*.fvecs
+*.ivecs
+*.tar.gz
+
+py/.venv/
+__pycache__/
