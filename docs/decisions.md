@@ -1,55 +1,41 @@
 # Decisions
 
-Why I picked things. Writing it down as I go, otherwise I won't remember the
-reasoning later.
+## Go
 
-## Go for the engine
+Python is too slow for a benchmark against FAISS. Rust is better on paper, but
+HNSW is a graph of mutually pointing nodes, the worst case for the borrow
+checker. Go has bench, pprof and race in the toolchain.
 
-The output of this project is a benchmark, so the language had to be fast
-enough for the comparison to mean anything, and had to make measuring easy.
+Cost: no SIMD. AVX2 in assembly later, measured not assumed.
 
-Python is out. Tight numeric loops run orders of magnitude slower, there's no
-control over memory layout, and the GIL blocks parallel search. A brute force
-scan or a graph traversal written in Python loses to FAISS by so much that the
-chart says nothing.
+## Flat storage, not [][]float32
 
-Between Go, Rust and C++:
+One slice, `At(i)` returns a window into it. One allocation instead of a million.
 
-Go's toolchain already contains everything this project needs to prove its
-claims. `go test -bench` for micro-benchmarks, `pprof` for profiling, and
-`-race` built into the test runner. Since search will be concurrent and the
-whole point is measured numbers, having those in the standard toolchain rather
-than bolted on matters more here than it would in most projects.
+`At` returns `Data[lo:hi:hi]`. Without the third number an append runs into the
+next vector.
 
-Goroutines and `sync.Pool` also map cleanly onto the concurrency shape I need:
-many parallel read-only searches, each holding a small private scratch buffer.
+## No square root in L2
 
-Rust would give me no GC and better SIMD. The trade is that HNSW is a graph of
-mutually referencing nodes, which is exactly the shape that fights the borrow
-checker hardest, and it would have meant `unsafe` or arena indices in the core
-data structure on day one.
+Monotonic, so the ranking is the same. One less op per comparison.
 
-C++ has the strongest SIMD story of the three, but slower iteration, no
-built-in test or benchmark runner, and manual lifetime management for the same
-graph structure.
+## Bounded heap, not sort
 
-## The cost of choosing Go
+O(n log k) against O(n log n), roughly 6x fewer comparisons at n=1M, k=10.
+`Add` is 1.96 ns, most candidates lose on the first compare.
 
-No clean SIMD. Go can't emit vector instructions from normal code, and the
-distance function is the hottest path in the program.
+## Ties broken by ID
 
-Plan is to write the L2 kernel in Go assembly using AVX2 and measure what it
-actually buys, rather than assuming the theoretical 8x. The gap between the
-theoretical number and the measured one is worth knowing.
+Equal distances are common. Without a rule, serial and parallel runs disagree
+and recall stops being comparable.
 
-GC pauses are the other cost. Mitigation is to allocate nothing per query, which
-means reusing scratch buffers instead of making new ones. Whether that's enough
-shows up in the p99 numbers.
+## Benchmarks
 
-## Squared distance instead of real Euclidean
+Used `-benchtime=200x` at first and got 53 ns for `topk.Add`. Real answer is
+1.96 ns. Default benchtime, three runs, take the median.
 
-TODO, write this up when I implement it.
+Flat, 100k x 128, single thread: 8.98 / 8.41 / 8.28 ms. About 84 ms at 1M,
+roughly 12 QPS. That's the number to beat.
 
-## Bounded heap instead of sorting candidates
-
-TODO
+Each query streams 51 MB past a 24 MB L3, so it's memory bound. Caps what AVX2
+can do.
