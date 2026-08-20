@@ -15,6 +15,17 @@ Early stage. Setting up the project.
 4. then try to make it faster: mmap the index, AVX2 distance kernel, product
    quantization
 
+## So far
+
+Exact search works and matches the SIFT1M ground truth exactly, recall@10 =
+1.000 over 10,000 queries. It runs at 12 queries/sec on one thread, 60 across
+sixteen.
+
+For comparison, hnswlib on the same data and machine does 5,286 queries/sec at
+96% recall. That's the gap HNSW is supposed to close.
+
+Raw numbers are in `bench/results/`.
+
 ## Running
 
     make test

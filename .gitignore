@@ -8,11 +8,16 @@ bin/
 /fastvec-bench
 /fastvec-build
 /fastvec-server
+/fastvec-subset
 
 # datasets go in /mnt/d/data, not in here
 *.fvecs
 *.ivecs
 *.tar.gz
+
+# except the ground truth for the 100k subset. It's 400K and without it nobody
+# can reproduce a recall number without downloading the full 168 MB dataset.
+!bench/data/*.ivecs
 
 py/.venv/
 __pycache__/
