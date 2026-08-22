@@ -6,8 +6,7 @@ import (
 	"testing"
 )
 
-// The whole point of the tie-break rule: however the work gets split, the
-// answer has to be identical to the single threaded one.
+// However the work gets split, the answer has to match the single threaded one.
 func TestSearchNMatchesSerial(t *testing.T) {
 	r := rand.New(rand.NewSource(21))
 	f := NewFlat(randomSet(r, 5000, 32))
