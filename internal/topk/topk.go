@@ -8,9 +8,12 @@ type Result struct {
 	Dist float32
 }
 
-// better reports whether a should rank above b. Equal distances fall back to
+// Before reports whether a should rank above b. Equal distances fall back to
 // the ID so the ordering can't depend on visit order.
-func better(a, b Result) bool {
+//
+// Exported because the HNSW candidate heap needs the same rule, and two copies
+// of a tie-break eventually disagree.
+func Before(a, b Result) bool {
 	if a.Dist != b.Dist {
 		return a.Dist < b.Dist
 	}
@@ -44,6 +47,9 @@ func (c *Collector) Reset() {
 
 func (c *Collector) Len() int { return len(c.items) }
 
+// Cap is the k it was built with.
+func (c *Collector) Cap() int { return c.k }
+
 // Worst returns the current k'th best distance and whether the collector is
 // full. A caller can use it to skip candidates that can't make the cut.
 func (c *Collector) Worst() (float32, bool) {
@@ -62,7 +68,7 @@ func (c *Collector) Add(id int32, dist float32) {
 		return
 	}
 
-	if better(cand, c.items[0]) {
+	if Before(cand, c.items[0]) {
 		c.items[0] = cand
 		c.down(0)
 	}
@@ -73,7 +79,7 @@ func (c *Collector) Add(id int32, dist float32) {
 func (c *Collector) Results() []Result {
 	out := make([]Result, len(c.items))
 	copy(out, c.items)
-	sort.Slice(out, func(i, j int) bool { return better(out[i], out[j]) })
+	sort.Slice(out, func(i, j int) bool { return Before(out[i], out[j]) })
 	return out
 }
 
@@ -83,7 +89,7 @@ func (c *Collector) Results() []Result {
 func (c *Collector) up(i int) {
 	for i > 0 {
 		parent := (i - 1) / 2
-		if !better(c.items[parent], c.items[i]) {
+		if !Before(c.items[parent], c.items[i]) {
 			break
 		}
 		c.items[parent], c.items[i] = c.items[i], c.items[parent]
@@ -95,10 +101,10 @@ func (c *Collector) down(i int) {
 	n := len(c.items)
 	for {
 		worst := i
-		if l := 2*i + 1; l < n && better(c.items[worst], c.items[l]) {
+		if l := 2*i + 1; l < n && Before(c.items[worst], c.items[l]) {
 			worst = l
 		}
-		if r := 2*i + 2; r < n && better(c.items[worst], c.items[r]) {
+		if r := 2*i + 2; r < n && Before(c.items[worst], c.items[r]) {
 			worst = r
 		}
 		if worst == i {

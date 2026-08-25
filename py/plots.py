@@ -60,7 +60,7 @@ def plot(dataset):
         fontsize=9, loc="left", color="#555",
     )
 
-    # A QPS number means nothing without the CPU it came off.
+    # Stamp the CPU on the chart so the numbers can be interpreted later.
     fig.text(0.01, 0.01, first["env"]["cpu"], fontsize=6, color="#888")
 
     PLOTS.mkdir(parents=True, exist_ok=True)

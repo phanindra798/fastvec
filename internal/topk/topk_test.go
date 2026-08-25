@@ -11,7 +11,7 @@ import (
 func brute(items []Result, k int) []Result {
 	out := make([]Result, len(items))
 	copy(out, items)
-	sort.Slice(out, func(i, j int) bool { return better(out[i], out[j]) })
+	sort.Slice(out, func(i, j int) bool { return Before(out[i], out[j]) })
 	if k > len(out) {
 		k = len(out)
 	}

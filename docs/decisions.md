@@ -76,6 +76,39 @@ different. That gap is why approximate search exists.
 
 Aiming to land within a few times of that curve. Beating it isn't the goal.
 
+## Pruning at MMax, not M
+
+Stage 1 first came out at recall 0.61 and failed its gate. Reachability said
+why: 23,214 of 100,000 nodes had no path from the entry point.
+
+Degree stats gave the cause away, min=16 max=16 mean=16.0. Every list
+permanently full, so every new link evicted an old one, and across 1.6M link
+operations plenty of those were some node's last inbound edge. The node keeps
+its outbound links, which is why nothing looks wrong until you check who points
+at it.
+
+Two parameters collapsed into one. M is how many neighbours you pick for a new
+node; MMax is the cap at which an existing list gets pruned. Using M for both
+prunes far harder than intended.
+
+    prune at        M          2M
+    orphans     23,214          4
+    recall       0.6084     0.9863
+
+Everything else unchanged. Build 48.6s for 100k, 2206 QPS at ef=100 against
+Flat's 92.
+
+The 0.70 gate was too low. A well connected flat graph over 100k with ef=100 is
+easier than I assumed. SIFT1M at stage 4 is the real test.
+
+## Stage 1 sweep
+
+    ef        10      20      50     100     200
+    recall  0.682   0.837   0.950   0.986   0.996
+    QPS     10248    6755    3744    2340    1393
+
+The dial behaves. Recall climbs, throughput falls.
+
 ## SIFT-100k for the gates
 
 First 100k base vectors and 1000 queries from SIFT1M, ground truth computed by
