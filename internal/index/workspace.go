@@ -13,13 +13,14 @@ type workspace struct {
 	epoch uint32   // this search's marker
 	cand  candidates
 	res   *topk.Collector
+	dist  distCounter
 }
 
 func newWorkspace(nodes int) *workspace {
 	return &workspace{stamp: make([]uint32, nodes)}
 }
 
-// begin readies the workspace for a new search over n nodes, keeping whatever
+// begin readies the workspace for a new search over nodes, keeping whatever
 // memory it already had.
 func (w *workspace) begin(nodes, ef int) {
 	if len(w.stamp) < nodes {
@@ -45,10 +46,5 @@ func (w *workspace) begin(nodes, ef int) {
 	}
 }
 
-func (w *workspace) seen(id int32) bool {
-	return w.stamp[id] == w.epoch
-}
-
-func (w *workspace) mark(id int32) {
-	w.stamp[id] = w.epoch
-}
+func (w *workspace) seen(id int32) bool { return w.stamp[id] == w.epoch }
+func (w *workspace) mark(id int32)      { w.stamp[id] = w.epoch }
