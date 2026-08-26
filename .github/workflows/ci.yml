@@ -1,6 +1,11 @@
 name: ci
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  # GitHub dropped a push event once and there was no way to re-run without an
+  # empty commit. This adds a manual trigger: gh workflow run ci
+  workflow_dispatch:
 
 jobs:
   test:
