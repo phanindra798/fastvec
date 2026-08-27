@@ -36,6 +36,7 @@ type HNSW struct {
 
 	efConstruct int
 	singleLayer bool
+	nearestM    bool
 
 	// Tunable while queries are running, so it can't be a plain int.
 	efSearch atomic.Int64
@@ -61,6 +62,10 @@ type Params struct {
 	// before the hierarchy. Kept so the two can be measured side by side
 	// instead of me claiming layers helped.
 	SingleLayer bool
+
+	// NearestM picks neighbours by plain distance instead of the paper's
+	// heuristic. Same reason: the two need comparing, not asserting.
+	NearestM bool
 }
 
 func DefaultParams() Params {
@@ -101,6 +106,7 @@ func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 		ml:          1 / math.Log(float64(p.M)),
 		efConstruct: p.EfConstruct,
 		singleLayer: p.SingleLayer,
+		nearestM:    p.NearestM,
 		rng:         rand.New(rand.NewSource(p.Seed)),
 	}
 	h.efSearch.Store(int64(p.EfSearch))
@@ -193,13 +199,7 @@ func (h *HNSW) insert(id int32) {
 			continue
 		}
 
-		// Stage 1 and 2 keep the nearest M. Stage 3 replaces this with the
-		// paper's heuristic, which keeps some further-away nodes because they
-		// point somewhere no closer neighbour does.
-		keep := found
-		if len(keep) > h.m {
-			keep = keep[:h.m]
-		}
+		keep := h.selectNeighbours(id, found, h.m)
 
 		h.links[id][lc] = make([]int32, 0, h.m)
 		for _, r := range keep {
@@ -230,16 +230,62 @@ func (h *HNSW) link(other, id int32, level int) {
 	}
 
 	v := h.vec(other)
-	keep := topk.New(limit)
+	ranked := topk.New(len(h.links[other][level]))
 	for _, nb := range h.links[other][level] {
-		keep.Add(nb, distance.L2Squared(v, h.vec(nb)))
+		ranked.Add(nb, distance.L2Squared(v, h.vec(nb)))
 	}
 
+	keep := h.selectNeighbours(other, ranked.Results(), limit)
+
 	trimmed := h.links[other][level][:0]
-	for _, r := range keep.Results() {
+	for _, r := range keep {
 		trimmed = append(trimmed, r.ID)
 	}
 	h.links[other][level] = trimmed
+}
+
+// selectNeighbours picks which m of the candidates to keep as neighbours of
+// node. Candidates arrive sorted nearest first.
+//
+// The obvious answer is the nearest m, and it builds a graph that falls into
+// clusters: inside a dense group every node links only to others in the same
+// group, and a walk that enters can't get out. Measured at 100k, that split the
+// bottom layer into six pieces with the largest holding 54% of the nodes.
+//
+// The paper's heuristic instead keeps a candidate only when it is closer to
+// node than to any neighbour already selected. A candidate sitting behind one
+// that's already in gets dropped, however near it is, because the existing one
+// already covers that direction. What survives are neighbours pointing
+// different ways, including some further off, and those are the edges that let
+// a walk leave a cluster.
+//
+// Costs m^2 distance computations per call, which shows up in build time.
+func (h *HNSW) selectNeighbours(node int32, candidates []topk.Result, m int) []topk.Result {
+	if h.nearestM {
+		if len(candidates) > m {
+			return candidates[:m]
+		}
+		return candidates
+	}
+
+	kept := make([]topk.Result, 0, m)
+	for _, c := range candidates {
+		if len(kept) >= m {
+			break
+		}
+
+		covered := false
+		for _, k := range kept {
+			if distance.L2Squared(h.vec(c.ID), h.vec(k.ID)) < c.Dist {
+				covered = true
+				break
+			}
+		}
+		if !covered {
+			kept = append(kept, c)
+		}
+	}
+	return kept
 }
 
 // descend does a greedy walk at one level and returns where it stopped. Used
@@ -352,14 +398,16 @@ func (h *HNSW) Reachable() int {
 	return h.walk(h.entry, seen)
 }
 
-// Components counts the connected pieces of the level-0 graph and returns the
-// size of the largest.
+// Components walks the level-0 graph from each node not yet seen and returns
+// how many walks it took to cover everything, plus the largest set one walk
+// reached.
 //
-// This is the diagnostic that survives the hierarchy. Level-0 links are
-// bidirectional, so the graph is undirected: if it splits into pieces, a query
-// whose descent lands in one piece can never reach vectors in another,
-// regardless of efSearch. One component means every vector is findable from
-// anywhere.
+// Edges are added in both directions but pruning can drop one side, so the
+// graph is directed and these are reachable sets rather than true undirected
+// components. A count of 1 still says what matters: every node is reachable
+// from the first one. A higher count means the graph came apart somewhere, and
+// a query whose descent lands in one piece can't reach vectors in another
+// however high efSearch goes.
 func (h *HNSW) Components() (count, largest int) {
 	seen := make([]bool, h.Len())
 	for id := range h.links {

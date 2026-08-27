@@ -17,14 +17,19 @@ Early stage. Setting up the project.
 
 ## So far
 
-Exact search works and matches the SIFT1M ground truth exactly, recall@10 =
-1.000 over 10,000 queries. It runs at 12 queries/sec on one thread, 60 across
-sixteen.
+Exact search matches the SIFT1M ground truth exactly, recall@10 = 1.000 over
+10,000 queries, at 12 queries/sec on one thread.
 
-For comparison, hnswlib on the same data and machine does 5,286 queries/sec at
-96% recall. That's the gap HNSW is supposed to close.
+HNSW is built through stage 3 of 4. On a 100k subset, single thread:
 
-Raw numbers are in `bench/results/`.
+    Flat (exact)        recall 1.0000     92 QPS
+    HNSW ef=100         recall 0.9961   2302 QPS
+
+25x faster for 0.4% of the answers differing. Layers and the neighbour
+heuristic are both in; scaling to the full million and comparing against
+hnswlib is next.
+
+Full numbers in `docs/benchmarks.md`, reasoning in `docs/decisions.md`.
 
 ## Running
 
