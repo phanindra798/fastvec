@@ -92,9 +92,9 @@ Degree min fell from 16 to 2, mean from 25.0 to 19.8. The heuristic rejects
 candidates, so the graph came out sparser and better connected at once. Build
 cost 11%.
 
-## Where it stands
+## SIFT-100k summary
 
-SIFT-100k, k=10, single thread:
+k=10, single thread:
 
                         recall    QPS    dist/query
     Flat (exact)        1.0000     92      100,000
@@ -102,4 +102,40 @@ SIFT-100k, k=10, single thread:
     stage 2 layered     0.9756   2563        1,327
     stage 3 heuristic   0.9961   2302        1,421
 
-SIFT1M numbers, and the comparison against hnswlib on equal terms, are stage 4.
+## Stage 4, SIFT1M against hnswlib
+
+Both single thread, same machine, M=16, efConstruction=200, k=10.
+
+    build       fastvec 23m23s        hnswlib 92.6s
+    levels      [1000000 62356 3994 246 26 2]
+    degree      min=1 max=32 mean=21.1
+    level 0     1 reachable set covering all 1,000,000
+    peak RSS    971 MB
+
+    ef      fastvec recall / QPS      hnswlib recall / QPS
+    10      0.7099 /  5908            0.708  / 19907
+    40      0.9275 /  2575            0.928  /  7650
+    60      0.9599 /  1867            0.960  /  5286
+    100     0.9835 /  1218            0.984  /  3771
+    200     0.9963 /   616            0.996  /  1999
+    500     0.9997 /   287            0.9997 /   864
+
+Recall matches to three decimal places at every point in the sweep. The index
+is as good as hnswlib's; the gap is execution speed, roughly 3x.
+
+Build is 15x slower. hnswlib inserts across all cores, this build is single
+threaded, and the neighbour heuristic costs M^2 distances per selection on top.
+
+### These timings are not trustworthy yet
+
+    User time 1523s   Elapsed 5162s   CPU 29%
+
+The process got under one core's worth over its run, so something was competing
+for the machine. The sweep alone took 63 minutes when it should have taken a
+few. QPS is understated by an unknown amount and the 3x gap is an upper bound.
+
+Recall is unaffected, timing is. Needs a re-run on an idle machine before any of
+these throughput numbers get quoted anywhere.
+
+There is no index persistence yet, so re-measuring means another 23 minute
+build. That is the argument for pulling save/load forward.

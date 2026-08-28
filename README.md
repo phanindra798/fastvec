@@ -15,19 +15,31 @@ Early stage. Setting up the project.
 4. then try to make it faster: mmap the index, AVX2 distance kernel, product
    quantization
 
-## So far
+## Results
 
-Exact search matches the SIFT1M ground truth exactly, recall@10 = 1.000 over
-10,000 queries, at 12 queries/sec on one thread.
+SIFT1M, one million 128-dimensional vectors, single thread, against hnswlib on
+the same machine.
 
-HNSW is built through stage 3 of 4. On a 100k subset, single thread:
+![recall against throughput](bench/plots/recall-qps-sift.png)
 
-    Flat (exact)        recall 1.0000     92 QPS
-    HNSW ef=100         recall 0.9961   2302 QPS
+    ef      fastvec recall / QPS      hnswlib recall / QPS
+    10      0.7099 /  5908            0.708  / 19907
+    60      0.9599 /  1867            0.960  /  5286
+    100     0.9835 /  1218            0.984  /  3771
+    500     0.9997 /   287            0.9997 /   864
 
-25x faster for 0.4% of the answers differing. Layers and the neighbour
-heuristic are both in; scaling to the full million and comparing against
-hnswlib is next.
+Recall matches to three decimal places at every point, so the graph is as good
+as the reference implementation. Throughput is about 3x behind, and build is
+15x slower: hnswlib inserts across all cores, this doesn't.
+
+Exact search over the same data does 12 queries/sec at recall 1.000, so the
+index is roughly 100x faster than brute force for 1.6% of answers differing at
+ef=100.
+
+Caveat on those throughput numbers: the machine was under load during the run
+and the process averaged 29% CPU, so QPS is understated and the 3x gap is an
+upper bound. Recall is unaffected. Needs a clean re-run, see
+`docs/benchmarks.md`.
 
 Full numbers in `docs/benchmarks.md`, reasoning in `docs/decisions.md`.
 
