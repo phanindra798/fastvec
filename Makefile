@@ -28,8 +28,10 @@ clean:
 subset:
 	$(GO) run ./cmd/fastvec-subset -src $(DATA)/sift -dst $(DATA)/sift100k
 
+# Reuses $(DATA)/sift.fvi when it exists, so a re-measure costs seconds
+# instead of a 23 minute rebuild. Delete that file to force a fresh build.
 bench:
-	$(GO) run ./cmd/fastvec-bench -data $(DATA)/sift -name sift
+	$(GO) run ./cmd/fastvec-bench -data $(DATA)/sift -name sift -index $(DATA)/sift.fvi
 
 baseline:
 	py/.venv/bin/python py/bench_baselines.py --data $(DATA)/sift --name sift

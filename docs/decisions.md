@@ -94,6 +94,21 @@ count of 1 still says the thing worth saying: everything is reachable from the
 first node. Worth knowing the distinction before claiming the graph is
 "connected".
 
+## Index persistence
+
+Custom binary format, little endian. Header, then how many levels each node
+occupies, then the adjacency lists, then the vectors.
+
+Vectors go in the file rather than being read back from the dataset, so a
+loaded index works on its own. Costs size, SIFT1M comes to about 550 MB of
+which 512 MB is the vectors, but an index that needs the original .fvecs
+alongside it is half an index.
+
+Written because re-measuring throughput meant a 23 minute rebuild every time.
+Load is 42 ms on the 10k set. Tests cover the round trip returning identical
+results, the same seed producing byte-identical files, and rejection of empty,
+truncated, wrong-magic and future-version files.
+
 ## A check that went stale
 
 `Reachable` counted nodes reachable from the entry point through level 0.

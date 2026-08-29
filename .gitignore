@@ -19,5 +19,8 @@ bin/
 # can reproduce a recall number without downloading the full 168 MB dataset.
 !bench/data/*.ivecs
 
+# saved indexes. A SIFT1M one is around 550 MB.
+*.fvi
+
 py/.venv/
 __pycache__/

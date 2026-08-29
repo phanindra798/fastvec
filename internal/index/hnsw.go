@@ -43,6 +43,7 @@ type HNSW struct {
 
 	entry    int32
 	maxLevel int
+	seed     int64
 
 	rng  *rand.Rand // build only, never touched by a query
 	pool sync.Pool
@@ -107,6 +108,7 @@ func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 		efConstruct: p.EfConstruct,
 		singleLayer: p.SingleLayer,
 		nearestM:    p.NearestM,
+		seed:        p.Seed,
 		rng:         rand.New(rand.NewSource(p.Seed)),
 	}
 	h.efSearch.Store(int64(p.EfSearch))

@@ -61,16 +61,17 @@ func main() {
 		efC     = flag.Int("efc", 200, "efConstruction")
 		seed    = flag.Int64("seed", 42, "level assignment seed")
 		out     = flag.String("out", "bench/results", "where to write the json")
+		idxPath = flag.String("index", "", "load the index from here if it exists, otherwise build and save it")
 	)
 	flag.Parse()
 
-	if err := run(*dataDir, *name, *gtPath, *k, *m, *efC, *seed, *out); err != nil {
+	if err := run(*dataDir, *name, *gtPath, *k, *m, *efC, *seed, *out, *idxPath); err != nil {
 		fmt.Fprintln(os.Stderr, "fastvec-bench:", err)
 		os.Exit(1)
 	}
 }
 
-func run(dir, name, gtPath string, k, m, efC int, seed int64, outDir string) error {
+func run(dir, name, gtPath string, k, m, efC int, seed int64, outDir, idxPath string) error {
 	base, err := fvecs.ReadFloat(filepath.Join(dir, name+"_base.fvecs"))
 	if err != nil {
 		return err
@@ -93,17 +94,19 @@ func run(dir, name, gtPath string, k, m, efC int, seed int64, outDir string) err
 
 	p := index.Params{M: m, MMax0: 2 * m, EfConstruct: efC, EfSearch: 100, Seed: seed}
 
-	start := time.Now()
-	h, err := index.BuildHNSW(base, p)
+	h, build, err := loadOrBuild(base, p, idxPath)
 	if err != nil {
 		return err
 	}
-	build := time.Since(start)
 
 	minD, maxD, meanD := h.Degrees()
 	count, largest := h.Components()
-	fmt.Printf("built in %v, levels %v, degree min=%d max=%d mean=%.1f\n",
-		build.Round(time.Millisecond), h.LevelSizes(), minD, maxD, meanD)
+	origin := "loaded from disk"
+	if build > 0 {
+		origin = "built in " + build.Round(time.Millisecond).String()
+	}
+	fmt.Printf("%s, levels %v, degree min=%d max=%d mean=%.1f\n",
+		origin, h.LevelSizes(), minD, maxD, meanD)
 	fmt.Printf("level 0 reachable sets: %d, largest %d of %d\n", count, largest, h.Len())
 
 	rep := report{
@@ -184,6 +187,51 @@ func run(dir, name, gtPath string, k, m, efC int, seed int64, outDir string) err
 
 	fmt.Printf("wrote %s\n", path)
 	return nil
+}
+
+// loadOrBuild reads a saved index when one is there, otherwise builds and saves
+// it. A million vectors take 23 minutes to build, which is too long to pay
+// again every time a timing needs re-measuring on an idle machine.
+//
+// The returned duration is the build time, or zero when it came off disk. A
+// loaded index reports no build time rather than a fake one.
+func loadOrBuild(base *fvecs.Float, p index.Params, path string) (*index.HNSW, time.Duration, error) {
+	if path != "" {
+		f, err := os.Open(path)
+		switch {
+		case err == nil:
+			defer f.Close()
+			start := time.Now()
+			h, err := index.LoadHNSW(f)
+			if err != nil {
+				return nil, 0, fmt.Errorf("%s: %w", path, err)
+			}
+			fmt.Printf("loaded index from %s in %v\n", path, time.Since(start).Round(time.Millisecond))
+			return h, 0, nil
+		case !os.IsNotExist(err):
+			return nil, 0, err
+		}
+	}
+
+	start := time.Now()
+	h, err := index.BuildHNSW(base, p)
+	if err != nil {
+		return nil, 0, err
+	}
+	build := time.Since(start)
+
+	if path != "" {
+		f, err := os.Create(path)
+		if err != nil {
+			return nil, 0, err
+		}
+		defer f.Close()
+		if err := h.Save(f); err != nil {
+			return nil, 0, err
+		}
+		fmt.Printf("saved index to %s\n", path)
+	}
+	return h, build, nil
 }
 
 // Counts a result correct if it is at least as close as the k'th listed
