@@ -139,3 +139,31 @@ these throughput numbers get quoted anywhere.
 
 There is no index persistence yet, so re-measuring means another 23 minute
 build. That is the argument for pulling save/load forward.
+
+## AVX2 distance kernel
+
+Same public function, matched benchmarks, two builds. `-tags purego`
+compiles the assembly out entirely.
+
+    scalar   80.09 / 81.50 / 81.74 / 82.17 / 82.41 ns
+    avx2     12.25 / 12.57 / 12.71 / 12.72 / 14.07 ns
+
+6.4x on the kernel, median to median, 128 dimensions.
+
+End to end on SIFT-100k, same index, k=10:
+
+    ef       scalar QPS   avx2 QPS   speedup   recall
+    20            7,288     14,475     1.99x   0.9046 both
+    100           2,020      3,788     1.88x   0.9961 both
+    200           1,152      2,135     1.85x   0.9992 both
+
+Recall identical at every point, so the kernel changed speed and nothing else.
+
+6.4x on one part turning into 1.88x overall puts that part at about 55% of
+search time before, roughly 15% after. The rest is heap operations, visited set
+checks, and cache misses walking the graph.
+
+Correctness: worst relative error against scalar was 1.64e-06 over 6500 random
+pairs across 14 dimension sizes. Across 2000 trials the kernel never disagreed
+with scalar about which of two vectors was nearer, which is the property that
+actually matters.

@@ -36,9 +36,15 @@ Exact search over the same data does 12 queries/sec at recall 1.000, so the
 index is roughly 100x faster than brute force for 1.6% of answers differing at
 ef=100.
 
-Caveat on those throughput numbers: the machine was under load during the run
-and the process averaged 29% CPU, so QPS is understated and the 3x gap is an
-upper bound. Recall is unaffected. Needs a clean re-run, see
+The distance function is hand-written AVX2 in Go assembly, since Go cannot emit
+vector instructions from normal code. 6.4x on the kernel itself, 1.9x on a whole
+search, with recall unchanged. The gap between those two is the interesting
+part: it puts distance computation at roughly 55% of search time before, 15%
+after. Build with `-tags purego` to compile the assembly out and compare.
+
+Caveat on the SIFT1M throughput numbers above: the machine was under load during
+that run and the process averaged 29% CPU, so QPS is understated and the 3x gap
+is an upper bound. Recall is unaffected. Needs a clean re-run, see
 `docs/benchmarks.md`.
 
 Full numbers in `docs/benchmarks.md`, reasoning in `docs/decisions.md`.

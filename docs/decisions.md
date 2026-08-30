@@ -83,6 +83,36 @@ survives points different ways, and those are the edges out of a cluster.
 
 Result: sparser graph, better connected. Costs M^2 distances per selection.
 
+## AVX2 kernel, and detecting it without a dependency
+
+Go cannot emit vector instructions from normal code, so the distance function is
+about 50 lines of assembly. Two accumulators rather than one, because the
+multiply and the add each have latency and a single chain stalls on itself.
+
+Feature detection is written here rather than pulled from
+golang.org/x/sys/cpu, which would have been the only third party dependency in
+the project. Three things have to hold before touching YMM registers: the CPU
+reports AVX2, the CPU reports AVX, and the OS has agreed to save YMM state
+across a context switch. That last one is the trap, since a CPU can advertise
+AVX2 while the OS has not enabled the wider state, and using it then corrupts
+registers rather than faulting.
+
+The kernel is not bit identical to scalar and does not need to be. Scalar keeps
+one running sum; the kernel keeps eight partial sums and adds them at the end,
+and floating point addition is not associative. Tests check a relative tolerance
+and, more importantly, that the kernel never disagrees with scalar about which
+of two vectors is nearer.
+
+## Measuring the speedup honestly
+
+First attempt compared the kernel against L2SquaredScalar and got 8.1x. Wrong
+baseline: Go will not inline a function containing a loop, so calling
+L2SquaredScalar directly measures a different code shape from calling L2Squared,
+which is what the index actually uses. The two differ by 20%.
+
+Matched comparison is the same public function under two build tags, purego
+against the default. 81.74 to 12.71 ns, 6.4x.
+
 ## Pruning makes the graph directed
 
 `link` adds an edge both ways, then prunes, and the prune can drop the side it
