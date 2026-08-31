@@ -9,6 +9,52 @@ computed by Flat), SIFT1M for the headline figures. k=10 throughout.
 
 Distance counts come from a `-tags diagnostic` build. Timings never do.
 
+## Headline, SIFT1M
+
+Both implementations run back to back in one session, machine otherwise idle.
+Load average 0.45 at the start; fastvec held 99% of one core throughout, so
+nothing was competing. M=16, efConstruction=200, single thread.
+
+    ef      fastvec recall / QPS      hnswlib recall / QPS      ratio
+    10      0.7099 / 13079            0.7080 / 22858            1.75x
+    20      0.8395 /  8573            0.8402 / 14756            1.72x
+    40      0.9275 /  5854            0.9278 /  8994            1.54x
+    60      0.9599 /  4109            0.9600 /  6282            1.53x
+    80      0.9754 /  3237            0.9754 /  4824            1.49x
+    100     0.9835 /  2656            0.9836 /  4234            1.59x
+    150     0.9929 /  1846            0.9928 /  2973            1.61x
+    200     0.9963 /  1415            0.9963 /  2244            1.59x
+    300     0.9987 /  1073            0.9988 /  1515            1.41x
+    500     0.9997 /   626            0.9997 /   937            1.50x
+
+Recall matches to three or four decimal places at every point. The graph is as
+good as the reference implementation; the gap is execution speed, 1.5 to 1.75x.
+
+Exact search over the same data does 12 QPS at recall 1.0000, so the index is
+roughly 220x faster than brute force at ef=100 for 1.6% of answers differing.
+
+### Build
+
+    fastvec   11m12s at   99% CPU  =  672 core-seconds
+    hnswlib     83.1s at 1100% CPU  =  914 core-seconds
+
+hnswlib is 8x faster on the clock because it inserts across eleven cores. Per
+core it does 26% more work than this build does. The wall-clock gap is entirely
+parallelism, not inefficiency, and parallel insert is the obvious next step.
+
+Peak RSS 1.21 GB. Levels [1000000 62356 3994 246 26 2], degree min=1 max=32
+mean=21.1, and the bottom layer is one reachable set covering all 1,000,000.
+
+### An earlier run of this was wrong
+
+The first SIFT1M measurement reported 3x slower than hnswlib. That run averaged
+29% CPU over 86 minutes because something else was using the machine, and it
+predated the AVX2 kernel. It also compared against hnswlib numbers taken ten
+days earlier under unknown conditions.
+
+Both of those are why this one runs the two implementations minutes apart on an
+idle machine and records load average and CPU percentage alongside the results.
+
 ## Exact search
 
 Flat, 100k x 128, single thread, three runs: 8.98 / 8.41 / 8.28 ms.
@@ -18,22 +64,10 @@ Flat, 100k x 128, single thread, three runs: 8.98 / 8.41 / 8.28 ms.
 
 8 workers beats 12 and loses to 6. Six P-cores, four E-cores, and the merge
 waits for the slowest. 4.56x from 16 threads, not 16x: each query moves 51 MB in
-1.75 ms, about 29 GB/s, near what the memory delivers. That also caps what AVX2
-can buy later.
+1.75 ms, about 29 GB/s, near what the memory delivers.
 
 SIFT1M: 10,000 queries in 2m45s, 16.5 ms each, 60 QPS on 16 threads, 12 on one.
 Recall 1.0000 against the shipped ground truth.
-
-## hnswlib, the target
-
-M=16, efConstruction=200, single thread, SIFT1M. Build 92.6s.
-
-    ef        10      40      60     100     200     500
-    recall  0.708   0.928   0.960   0.984   0.996   0.9997
-    QPS     19907    7650    5286    3771    1999      864
-
-5286 QPS at 96% recall against our exact 12, so roughly 440x for 4% of the
-answers differing.
 
 ## Stage 1, flat graph
 
@@ -48,8 +82,6 @@ Sweep with MMax = 2M, SIFT-100k:
     ef        10      20      50     100     200
     recall  0.682   0.837   0.950   0.986   0.996
     QPS     10248    6755    3744    2340    1393
-
-Build 48.6s for 100k. 2340 QPS at ef=100 against Flat's 92.
 
 ## Stage 2, layers
 
@@ -89,61 +121,12 @@ fewer: nearest-M never reaches 0.979 anywhere in the sweep, its best being
 accuracy, 36% less work.
 
 Degree min fell from 16 to 2, mean from 25.0 to 19.8. The heuristic rejects
-candidates, so the graph came out sparser and better connected at once. Build
-cost 11%.
-
-## SIFT-100k summary
-
-k=10, single thread:
-
-                        recall    QPS    dist/query
-    Flat (exact)        1.0000     92      100,000
-    stage 1 flat graph  0.9863   2340        1,407
-    stage 2 layered     0.9756   2563        1,327
-    stage 3 heuristic   0.9961   2302        1,421
-
-## Stage 4, SIFT1M against hnswlib
-
-Both single thread, same machine, M=16, efConstruction=200, k=10.
-
-    build       fastvec 23m23s        hnswlib 92.6s
-    levels      [1000000 62356 3994 246 26 2]
-    degree      min=1 max=32 mean=21.1
-    level 0     1 reachable set covering all 1,000,000
-    peak RSS    971 MB
-
-    ef      fastvec recall / QPS      hnswlib recall / QPS
-    10      0.7099 /  5908            0.708  / 19907
-    40      0.9275 /  2575            0.928  /  7650
-    60      0.9599 /  1867            0.960  /  5286
-    100     0.9835 /  1218            0.984  /  3771
-    200     0.9963 /   616            0.996  /  1999
-    500     0.9997 /   287            0.9997 /   864
-
-Recall matches to three decimal places at every point in the sweep. The index
-is as good as hnswlib's; the gap is execution speed, roughly 3x.
-
-Build is 15x slower. hnswlib inserts across all cores, this build is single
-threaded, and the neighbour heuristic costs M^2 distances per selection on top.
-
-### These timings are not trustworthy yet
-
-    User time 1523s   Elapsed 5162s   CPU 29%
-
-The process got under one core's worth over its run, so something was competing
-for the machine. The sweep alone took 63 minutes when it should have taken a
-few. QPS is understated by an unknown amount and the 3x gap is an upper bound.
-
-Recall is unaffected, timing is. Needs a re-run on an idle machine before any of
-these throughput numbers get quoted anywhere.
-
-There is no index persistence yet, so re-measuring means another 23 minute
-build. That is the argument for pulling save/load forward.
+candidates, so the graph came out sparser and better connected at once.
 
 ## AVX2 distance kernel
 
-Same public function, matched benchmarks, two builds. `-tags purego`
-compiles the assembly out entirely.
+Same public function, matched benchmarks, two builds. `-tags purego` compiles
+the assembly out entirely.
 
     scalar   80.09 / 81.50 / 81.74 / 82.17 / 82.41 ns
     avx2     12.25 / 12.57 / 12.71 / 12.72 / 14.07 ns
@@ -167,3 +150,24 @@ Correctness: worst relative error against scalar was 1.64e-06 over 6500 random
 pairs across 14 dimension sizes. Across 2000 trials the kernel never disagreed
 with scalar about which of two vectors was nearer, which is the property that
 actually matters.
+
+## Index persistence
+
+    save   58 MB for the 100k index
+    load   164 ms
+
+Before the buffered word reader it was 613 ms, because binary.Read was being
+called once per value and SIFT1M holds about 150 million of them.
+
+SIFT1M loads in roughly 2 seconds against an 11 minute rebuild, which is what
+makes re-measuring on an idle machine practical.
+
+## SIFT-100k summary
+
+k=10, single thread:
+
+                        recall    QPS    dist/query
+    Flat (exact)        1.0000     92      100,000
+    stage 1 flat graph  0.9863   2340        1,407
+    stage 2 layered     0.9756   2563        1,327
+    stage 3 heuristic   0.9961   2302        1,421
