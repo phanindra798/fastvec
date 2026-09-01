@@ -45,6 +45,12 @@ type HNSW struct {
 	maxLevel int
 	seed     int64
 
+	// Only meaningful while building. A finished index is immutable, so
+	// queries never take a lock and pay nothing for these.
+	locks    []sync.Mutex
+	topMu    sync.Mutex
+	building bool
+
 	rng  *rand.Rand // build only, never touched by a query
 	pool sync.Pool
 
@@ -67,6 +73,11 @@ type Params struct {
 	// NearestM picks neighbours by plain distance instead of the paper's
 	// heuristic. Same reason: the two need comparing, not asserting.
 	NearestM bool
+
+	// BuildWorkers inserts across this many goroutines. Below 2 runs
+	// sequentially, which stays the default because it is the only mode that
+	// produces the same index twice. See decisions.md.
+	BuildWorkers int
 }
 
 func DefaultParams() Params {
@@ -120,10 +131,57 @@ func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 	h.entry = 0
 	h.maxLevel = len(h.links[0]) - 1
 
-	for i := 1; i < n; i++ {
-		h.insert(int32(i))
+	if p.BuildWorkers > 1 {
+		h.buildParallel(n, p.BuildWorkers)
+	} else {
+		for i := 1; i < n; i++ {
+			h.insert(int32(i))
+		}
 	}
 	return h, nil
+}
+
+// buildParallel inserts across several goroutines.
+//
+// Levels are drawn up front on one goroutine, because the RNG is stateful and
+// having workers pull from it would make the level assignment depend on
+// scheduling. Drawing them in ID order keeps that part identical to a
+// sequential build; what varies is the order nodes get linked in.
+//
+// Each node gets a mutex covering its neighbour lists. Traversal copies a list
+// under that lock rather than reading it live, since another worker may be
+// appending. Contention is low: a million nodes against a handful of workers.
+func (h *HNSW) buildParallel(n, workers int) {
+	levels := make([]int, n)
+	for i := 1; i < n; i++ {
+		levels[i] = h.randomLevel()
+	}
+
+	h.locks = make([]sync.Mutex, n)
+	h.building = true
+	defer func() {
+		h.building = false
+		h.locks = nil
+	}()
+
+	ids := make(chan int32, 1024)
+	var wg sync.WaitGroup
+
+	for w := 0; w < workers; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for id := range ids {
+				h.insertAt(id, levels[id])
+			}
+		}()
+	}
+
+	for i := 1; i < n; i++ {
+		ids <- int32(i)
+	}
+	close(ids)
+	wg.Wait()
 }
 
 func newLevels(top int) [][]int32 {
@@ -175,24 +233,34 @@ func (h *HNSW) capAt(level int) int {
 // insert places a node at a random top level, walks down to it, then links it
 // into every layer from there to the bottom.
 func (h *HNSW) insert(id int32) {
+	h.insertAt(id, h.randomLevel())
+}
+
+// insertAt is insert with the level already chosen. Parallel builds draw all
+// the levels up front, so the RNG stays on one goroutine.
+func (h *HNSW) insertAt(id int32, level int) {
 	q := h.vec(id)
-	level := h.randomLevel()
+
+	// Publishing this before anything links to id is what makes the node safe
+	// to follow. A worker only sees id in some other node's list after taking
+	// that node's lock, and the lock release orders this write ahead of it.
 	h.links[id] = newLevels(level)
 
 	w := h.pool.Get().(*workspace)
 	defer h.pool.Put(w)
 
-	ep := h.entry
+	entry, top := h.topOfIndex()
+	ep := entry
 
 	// Above the new node's own level there is nothing to link, so just find the
 	// best entry point to carry down. ef of 1 is a plain greedy walk.
-	for lc := h.maxLevel; lc > level; lc-- {
+	for lc := top; lc > level; lc-- {
 		ep = h.descend(q, ep, lc, w)
 	}
 
 	start := level
-	if start > h.maxLevel {
-		start = h.maxLevel
+	if start > top {
+		start = top
 	}
 
 	for lc := start; lc >= 0; lc-- {
@@ -203,19 +271,72 @@ func (h *HNSW) insert(id int32) {
 
 		keep := h.selectNeighbours(id, found, h.m)
 
-		h.links[id][lc] = make([]int32, 0, h.m)
+		own := make([]int32, 0, h.m)
 		for _, r := range keep {
-			h.links[id][lc] = append(h.links[id][lc], r.ID)
+			own = append(own, r.ID)
+		}
+		h.setOwn(id, lc, own)
+
+		for _, r := range keep {
 			h.link(r.ID, id, lc)
 		}
 
 		ep = found[0].ID
 	}
 
+	h.raiseTop(id, level)
+}
+
+// topOfIndex reads the entry point and its level together, so a parallel build
+// cannot descend from an entry that has since been replaced by a taller node.
+func (h *HNSW) topOfIndex() (int32, int) {
+	if !h.building {
+		return h.entry, h.maxLevel
+	}
+	h.topMu.Lock()
+	defer h.topMu.Unlock()
+	return h.entry, h.maxLevel
+}
+
+func (h *HNSW) raiseTop(id int32, level int) {
+	if !h.building {
+		if level > h.maxLevel {
+			h.maxLevel = level
+			h.entry = id
+		}
+		return
+	}
+	h.topMu.Lock()
 	if level > h.maxLevel {
 		h.maxLevel = level
 		h.entry = id
 	}
+	h.topMu.Unlock()
+}
+
+func (h *HNSW) setOwn(id int32, level int, nbs []int32) {
+	if !h.building {
+		h.links[id][level] = nbs
+		return
+	}
+	h.locks[id].Lock()
+	h.links[id][level] = nbs
+	h.locks[id].Unlock()
+}
+
+// neighbours hands back node id's list at this level.
+//
+// A finished index is immutable, so a query gets the slice directly and pays
+// nothing. During a build another worker may be appending to it, so the list is
+// copied into the caller's scratch buffer under the node's lock.
+func (h *HNSW) neighbours(id int32, level int, scratch []int32) []int32 {
+	if !h.building {
+		return h.links[id][level]
+	}
+	h.locks[id].Lock()
+	scratch = append(scratch[:0], h.links[id][level]...)
+	h.locks[id].Unlock()
+	return scratch
 }
 
 // link adds id to other's neighbour list at this level, pruning back to the
@@ -223,7 +344,15 @@ func (h *HNSW) insert(id int32) {
 //
 // Prune at mMax, not m. Pruning at m orphaned 23% of a 100k graph, see
 // decisions.md.
+// The whole append-and-maybe-prune runs under other's lock during a parallel
+// build. Splitting it would let two workers each read a list of mMax, each
+// decide to prune, and each write back a result missing the other's edge.
 func (h *HNSW) link(other, id int32, level int) {
+	if h.building {
+		h.locks[other].Lock()
+		defer h.locks[other].Unlock()
+	}
+
 	h.links[other][level] = append(h.links[other][level], id)
 
 	limit := h.capAt(level)
@@ -298,7 +427,8 @@ func (h *HNSW) descend(q []float32, ep int32, level int, w *workspace) int32 {
 
 	for improved := true; improved; {
 		improved = false
-		for _, nb := range h.links[best][level] {
+		w.nbuf = h.neighbours(best, level, w.nbuf)
+		for _, nb := range w.nbuf {
 			if d := h.measure(q, nb, w); d < bestDist {
 				best, bestDist, improved = nb, d, true
 			}
@@ -331,7 +461,8 @@ func (h *HNSW) searchLayer(q []float32, ep int32, ef, level int, skip int32, w *
 			break
 		}
 
-		for _, nb := range h.links[c.ID][level] {
+		w.nbuf = h.neighbours(c.ID, level, w.nbuf)
+		for _, nb := range w.nbuf {
 			if w.seen(nb) {
 				continue
 			}

@@ -162,6 +162,29 @@ called once per value and SIFT1M holds about 150 million of them.
 SIFT1M loads in roughly 2 seconds against an 11 minute rebuild, which is what
 makes re-measuring on an idle machine practical.
 
+## Parallel build
+
+SIFT-100k, sequential against all 16 workers, same seed and parameters.
+
+    build      32.9s to 3.79s        8.7x
+    stranded   0 to 284 nodes        0.28% of the graph
+    levels     identical
+
+    ef      sequential            parallel
+    20      0.9046 / 16773 QPS    0.9013 / 16973 QPS
+    100     0.9961 /  4397 QPS    0.9925 /  4342 QPS
+    200     0.9992 /  2435 QPS    0.9957 /  2335 QPS
+
+A third of a point of recall at every setting, matching the stranded fraction,
+so it is a real cost rather than noise. Query throughput is unaffected.
+
+The cause is inherent: sequentially a node is inserted into a graph where
+everything before it is fully linked, in parallel many nodes are half linked at
+once, so a new node searches an incomplete graph and picks worse neighbours.
+
+Default stays sequential, since that is the only mode that produces the same
+index twice.
+
 ## SIFT-100k summary
 
 k=10, single thread:

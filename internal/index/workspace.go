@@ -14,6 +14,11 @@ type workspace struct {
 	cand  candidates
 	res   *topk.Collector
 	dist  distCounter
+
+	// Somewhere to copy a node's neighbour list into during a parallel build,
+	// where reading it live would race another worker appending to it. Reused
+	// across nodes, so it costs one allocation per workspace.
+	nbuf []int32
 }
 
 func newWorkspace(nodes int) *workspace {

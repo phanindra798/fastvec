@@ -113,6 +113,38 @@ which is what the index actually uses. The two differ by 20%.
 Matched comparison is the same public function under two build tags, purego
 against the default. 81.74 to 12.71 ns, 6.4x.
 
+## Parallel build, and why it is not the default
+
+BuildWorkers above 1 inserts across goroutines. Each node carries a mutex over
+its neighbour lists; traversal copies a list under that lock rather than reading
+it live, since another worker may be appending. Entry point and max level sit
+behind one more mutex.
+
+Levels are drawn up front on a single goroutine. The RNG is stateful, so having
+workers pull from it would make level assignment depend on scheduling. Drawn in
+ID order it stays identical to a sequential build, and a test checks that.
+
+The ordering that makes a node safe to follow: h.links[id] is allocated before
+anything links to id, and a worker only sees id in another node's list after
+taking that node's lock. The lock release orders the allocation ahead of the
+read.
+
+It costs quality. Sequentially a node is inserted into a graph where everything
+before it is fully linked. In parallel many nodes are half linked at once, so a
+new node searches an incomplete graph and picks worse neighbours. On 100k:
+
+    build    32.9s to 3.79s      8.7x
+    stranded 0 to 284 nodes      0.28%
+    recall   0.9961 to 0.9925    ef=100, and the same third of a point at 20 and 200
+
+Consistent across the sweep and matching the stranded fraction almost exactly,
+so it is a real cost rather than noise.
+
+Default stays sequential. It is the only mode that produces the same index
+twice, and byte identical rebuilds are worth more here than build time, since
+the whole project is an argument about measurement. Parallel is there for when
+build time is what matters, with the cost written down.
+
 ## Pruning makes the graph directed
 
 `link` adds an edge both ways, then prunes, and the prune can drop the side it
