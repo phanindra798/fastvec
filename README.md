@@ -32,8 +32,13 @@ differing.
     hnswlib     83.1s at 1100% CPU  =  914 core-seconds
 
 hnswlib is 8x faster on the clock because it inserts across eleven cores. Per
-core this build does 26% less work than theirs. The wall-clock gap is entirely
-parallelism, and parallel insert is the next thing worth doing.
+core this build does 26% less work than theirs, so the gap is parallelism rather
+than inefficiency.
+
+`BuildWorkers` inserts across goroutines and closes most of it: on SIFT-100k,
+32.9s down to 3.79s, 8.7x. It costs 0.36 recall points, because a node inserted
+while its neighbourhood is still half linked picks worse neighbours. Sequential
+stays the default, since it is the only mode that produces the same index twice.
 
 ### Distance kernel
 

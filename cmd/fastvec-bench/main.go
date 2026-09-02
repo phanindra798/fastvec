@@ -190,7 +190,7 @@ func run(dir, name, gtPath string, k, m, efC int, seed int64, outDir, idxPath st
 }
 
 // loadOrBuild reads a saved index when one is there, otherwise builds and saves
-// it. A million vectors take 23 minutes to build, which is too long to pay
+// it. A million vectors take 11 minutes to build, which is too long to pay
 // again every time a timing needs re-measuring on an idle machine.
 //
 // The returned duration is the build time, or zero when it came off disk. A
