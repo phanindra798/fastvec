@@ -6,6 +6,7 @@ every ANN paper: recall on x, throughput on y, up and to the right is better.
     python py/plots.py
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -70,6 +71,44 @@ def plot(dataset):
     print(f"wrote {out}")
 
 
+def plot_repeated(session):
+    """Plot medians and observed min/max ranges from a completed session."""
+    metadata = json.loads((session / "session.json").read_text())
+    if metadata["status"] != "complete":
+        raise ValueError("cannot plot an incomplete benchmark session")
+    summary = json.loads((session / "summary.json").read_text())
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=140)
+    for i, (implementation, run) in enumerate(summary.items()):
+        points = run["sweep"]
+        x = [p["recall"]["median"] for p in points]
+        y = [p["qps"]["median"] for p in points]
+        def errors(field):
+            return [[p[field]["median"] - p[field]["min"] for p in points],
+                    [p[field]["max"] - p[field]["median"] for p in points]]
+        ax.errorbar(x, y, xerr=errors("recall"), yerr=errors("qps"),
+                    fmt="o-", markersize=4, capsize=3, linewidth=1.4,
+                    color=COLOURS[i % len(COLOURS)], label=implementation)
+    first = next(iter(summary.values()))
+    ax.set_title(f"{first['dataset']} · {first['run_count']} paired runs · median and observed range", fontsize=11)
+    ax.set_xlabel(f"recall@{first['k']}")
+    ax.set_ylabel("queries per second, single thread")
+    ax.set_yscale("log")
+    ax.grid(True, which="both", linewidth=.4, alpha=.35)
+    ax.legend(frameon=False)
+    fig.text(.02, .015, "Bars show minimum–maximum, not confidence intervals. hnswlib rebuilds each run.", fontsize=8)
+    fig.tight_layout(rect=(0, .04, 1, 1))
+    path = session / "recall-qps.png"
+    fig.savefig(path)
+    plt.close(fig)
+    print(f"wrote {path}")
+
+
 if __name__ == "__main__":
-    for name in ("sift", "siftsmall"):
-        plot(name)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--session", type=Path, help="plot a completed repeated-run session")
+    args = parser.parse_args()
+    if args.session:
+        plot_repeated(args.session)
+    else:
+        for name in ("sift", "siftsmall"):
+            plot(name)

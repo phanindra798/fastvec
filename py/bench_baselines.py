@@ -6,6 +6,7 @@ Recall is measured by distance, matching the Go side. See decisions.md.
 """
 
 import argparse
+from datetime import datetime, timezone
 import json
 import platform
 import subprocess
@@ -14,6 +15,8 @@ from pathlib import Path
 
 import hnswlib
 import numpy as np
+
+from benchmark_timing import measure_throughput
 
 
 def read_fvecs(path):
@@ -49,10 +52,20 @@ def recall_at(base, queries, truth, found_ids, k):
 
 
 def cpu_model():
-    for line in Path("/proc/cpuinfo").read_text().splitlines():
-        if line.startswith("model name"):
-            return line.split(":", 1)[1].strip()
-    return "unknown"
+    if platform.system() == "Windows":
+        import winreg
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
+                return winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
+        except OSError:
+            return platform.processor() or "unknown"
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return platform.processor() or "unknown"
 
 
 def main():
@@ -64,6 +77,7 @@ def main():
     ap.add_argument("--ef-construction", type=int, default=200)
     ap.add_argument("--out", default="bench/results")
     args = ap.parse_args()
+    started_utc = datetime.now(timezone.utc).isoformat()
 
     d = Path(args.data)
     base = read_fvecs(d / f"{args.name}_base.fvecs")
@@ -92,21 +106,27 @@ def main():
 
         index.knn_query(queries[:300], k=args.k)  # warm up
 
-        t0 = time.perf_counter()
+        timed_queries, elapsed = measure_throughput(
+            lambda: index.knn_query(queries, k=args.k), len(queries)
+        )
+        # Evaluate recall in a separate, untimed pass, matching the Go runner.
         ids, _ = index.knn_query(queries, k=args.k)
-        elapsed = time.perf_counter() - t0
 
         r = recall_at(base, queries, truth, ids, args.k)
-        qps = len(queries) / elapsed
-        results.append({"ef": ef, "recall": r, "qps": qps, "ms_per_query": 1000 * elapsed / len(queries)})
-        print(f"  ef={ef:<4} recall@{args.k}={r:.4f}  {qps:8.1f} QPS  {1000*elapsed/len(queries):.3f} ms")
+        qps = timed_queries / elapsed
+        results.append({"ef": ef, "recall": r, "qps": qps, "ms_per_query": 1000 * elapsed / timed_queries,
+                        "timed_queries": timed_queries, "timed_seconds": elapsed})
+        print(f"  ef={ef:<4} recall@{args.k}={r:.4f}  {qps:8.1f} QPS  {1000*elapsed/timed_queries:.3f} ms")
 
     try:
         commit = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+        source_state = "dirty" if subprocess.check_output(["git", "status", "--porcelain"], text=True).strip() else "clean"
     except Exception:
         commit = "unknown"
+        source_state = "unknown"
 
     out = {
+        "timing_method": "search_only_repeated_sweeps_v2",
         "implementation": "hnswlib",
         "version": hnswlib.__version__ if hasattr(hnswlib, "__version__") else "0.8.0",
         "dataset": args.name,
@@ -120,6 +140,9 @@ def main():
         "threads": 1,
         "sweep": results,
         "env": {
+            "captured_utc": started_utc,
+            "source_state": source_state,
+            "os": platform.system() + "/" + platform.machine(),
             "cpu": cpu_model(),
             "python": platform.python_version(),
             "numpy": np.__version__,

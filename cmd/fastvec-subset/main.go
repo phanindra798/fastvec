@@ -38,6 +38,15 @@ func main() {
 }
 
 func run(src, dst, gtPath string, nBase, nQuery, k, workers int) error {
+	if nBase < 1 || nQuery < 1 {
+		return fmt.Errorf("base and query counts must be positive")
+	}
+	if k < 1 || k > nBase {
+		return fmt.Errorf("k must be between 1 and base count %d, got %d", nBase, k)
+	}
+	if nQuery > int(^uint(0)>>1)/4/k {
+		return fmt.Errorf("ground truth size exceeds platform limits")
+	}
 	base, err := fvecs.ReadFloat(filepath.Join(src, "sift_base.fvecs"))
 	if err != nil {
 		return err
@@ -49,6 +58,9 @@ func run(src, dst, gtPath string, nBase, nQuery, k, workers int) error {
 	if base.Len() < nBase || queries.Len() < nQuery {
 		return fmt.Errorf("source has %d base and %d queries, need %d and %d",
 			base.Len(), queries.Len(), nBase, nQuery)
+	}
+	if base.Dim != queries.Dim {
+		return fmt.Errorf("base dimension %d differs from query dimension %d", base.Dim, queries.Dim)
 	}
 
 	sub := &fvecs.Float{Dim: base.Dim, Data: base.Data[:nBase*base.Dim]}

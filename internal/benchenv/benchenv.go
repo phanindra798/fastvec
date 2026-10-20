@@ -8,18 +8,21 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Env struct {
-	CPU        string   `json:"cpu"`
-	LogicalCPU int      `json:"logical_cpus"`
-	GOMAXPROCS int      `json:"gomaxprocs"`
-	Go         string   `json:"go_version"`
-	OS         string   `json:"os"`
-	Kernel     string   `json:"kernel"`
-	LoadAvg    string   `json:"load_at_start"`
-	Commit     string   `json:"commit"`
-	Tags       []string `json:"build_tags"`
+	CapturedUTC string   `json:"captured_utc"`
+	SourceState string   `json:"source_state"`
+	CPU         string   `json:"cpu"`
+	LogicalCPU  int      `json:"logical_cpus"`
+	GOMAXPROCS  int      `json:"gomaxprocs"`
+	Go          string   `json:"go_version"`
+	OS          string   `json:"os"`
+	Kernel      string   `json:"kernel"`
+	LoadAvg     string   `json:"load_at_start"`
+	Commit      string   `json:"commit"`
+	Tags        []string `json:"build_tags"`
 }
 
 func Capture(tags ...string) Env {
@@ -27,19 +30,32 @@ func Capture(tags ...string) Env {
 		tags = []string{}
 	}
 	return Env{
-		CPU:        cpuModel(),
-		LogicalCPU: runtime.NumCPU(),
-		GOMAXPROCS: runtime.GOMAXPROCS(0),
-		Go:         runtime.Version(),
-		OS:         runtime.GOOS + "/" + runtime.GOARCH,
-		Kernel:     firstLine("/proc/sys/kernel/osrelease"),
-		LoadAvg:    firstLine("/proc/loadavg"),
-		Commit:     commit(),
-		Tags:       tags,
+		CapturedUTC: time.Now().UTC().Format(time.RFC3339),
+		SourceState: sourceState(),
+		CPU:         cpuModel(),
+		LogicalCPU:  runtime.NumCPU(),
+		GOMAXPROCS:  runtime.GOMAXPROCS(0),
+		Go:          runtime.Version(),
+		OS:          runtime.GOOS + "/" + runtime.GOARCH,
+		Kernel:      firstLine("/proc/sys/kernel/osrelease"),
+		LoadAvg:     firstLine("/proc/loadavg"),
+		Commit:      commit(),
+		Tags:        tags,
 	}
 }
 
 func cpuModel() string {
+	if runtime.GOOS == "windows" {
+		out, err := exec.Command("reg", "query", `HKLM\HARDWARE\DESCRIPTION\System\CentralProcessor\0`, "/v", "ProcessorNameString").Output()
+		if err == nil {
+			if _, value, ok := strings.Cut(string(out), "REG_SZ"); ok {
+				return strings.TrimSpace(value)
+			}
+		}
+		if value := os.Getenv("PROCESSOR_IDENTIFIER"); value != "" {
+			return value
+		}
+	}
 	f, err := os.Open("/proc/cpuinfo")
 	if err != nil {
 		return "unknown"
@@ -53,6 +69,17 @@ func cpuModel() string {
 		}
 	}
 	return "unknown"
+}
+
+func sourceState() string {
+	out, err := exec.Command("git", "status", "--porcelain").Output()
+	if err != nil {
+		return "unknown"
+	}
+	if len(strings.TrimSpace(string(out))) > 0 {
+		return "dirty"
+	}
+	return "clean"
 }
 
 func firstLine(path string) string {
