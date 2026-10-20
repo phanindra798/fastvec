@@ -9,13 +9,38 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        tags: ['', purego, diagnostic]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26.5'
-      - run: go vet ./...
-      - run: go build ./...
-      - run: go test ./...
-      - run: go test -race ./...
+      - run: go vet -tags="${{ matrix.tags }}" ./...
+      - run: go build -tags="${{ matrix.tags }}" ./...
+      - run: go test -short -tags="${{ matrix.tags }}" ./...
+
+  race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.5'
+      - run: go test -short -race ./...
+
+  python-timing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s py -p "test_*.py"
