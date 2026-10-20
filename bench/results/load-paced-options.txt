@@ -1,0 +1,10 @@
+=== RUN   TestLoadPacedComparison
+    load_slow_test.go:52: pair=1 single_pass=false bytes_read=698718400 elapsed_ns=6988657400 rate_bytes_sec=100000000 nodes=1000000
+    load_slow_test.go:52: pair=1 single_pass=true bytes_read=605346620 elapsed_ns=6090614100 rate_bytes_sec=100000000 nodes=1000000
+    load_slow_test.go:52: pair=2 single_pass=true bytes_read=605346620 elapsed_ns=6079195500 rate_bytes_sec=100000000 nodes=1000000
+    load_slow_test.go:52: pair=2 single_pass=false bytes_read=698718400 elapsed_ns=6988610900 rate_bytes_sec=100000000 nodes=1000000
+    load_slow_test.go:52: pair=3 single_pass=false bytes_read=698718400 elapsed_ns=6987723100 rate_bytes_sec=100000000 nodes=1000000
+    load_slow_test.go:52: pair=3 single_pass=true bytes_read=605346620 elapsed_ns=6080319200 rate_bytes_sec=100000000 nodes=1000000
+--- PASS: TestLoadPacedComparison (39.24s)
+PASS
+ok  	github.com/phanindra798/fastvec/internal/index	40.349s

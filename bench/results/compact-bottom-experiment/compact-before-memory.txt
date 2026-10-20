@@ -1,0 +1,9 @@
+goos: windows
+goarch: amd64
+pkg: github.com/phanindra798/fastvec/internal/index
+cpu: 12th Gen Intel(R) Core(TM) i7-12650H
+BenchmarkHNSWSearch
+    search_bench_test.go:34: retained index heap: 655697040 bytes, 2066602 objects
+BenchmarkHNSWSearch/ef100
+BenchmarkHNSWSearch/ef100         	       1	    212300 ns/op	     896 B/op	       1 allocs/op
+PASS

@@ -1,0 +1,62 @@
+[
+  {
+    "load_ns": 564146300,
+    "allocated_bytes": 750463080,
+    "allocations": 2066668,
+    "heap_bytes": 749556904,
+    "nodes": 1000000,
+    "pair": 1,
+    "variant": "before",
+    "peak_working_set_bytes": 765956096
+  },
+  {
+    "load_ns": 554126900,
+    "allocated_bytes": 660563560,
+    "allocations": 1066669,
+    "heap_bytes": 659395192,
+    "nodes": 1000000,
+    "pair": 1,
+    "variant": "after",
+    "peak_working_set_bytes": 708182016
+  },
+  {
+    "load_ns": 551662400,
+    "allocated_bytes": 660563560,
+    "allocations": 1066669,
+    "heap_bytes": 659395192,
+    "nodes": 1000000,
+    "pair": 2,
+    "variant": "after",
+    "peak_working_set_bytes": 671207424
+  },
+  {
+    "load_ns": 576937600,
+    "allocated_bytes": 750463080,
+    "allocations": 2066668,
+    "heap_bytes": 749556744,
+    "nodes": 1000000,
+    "pair": 2,
+    "variant": "before",
+    "peak_working_set_bytes": 765902848
+  },
+  {
+    "load_ns": 578067700,
+    "allocated_bytes": 750463080,
+    "allocations": 2066668,
+    "heap_bytes": 749556744,
+    "nodes": 1000000,
+    "pair": 3,
+    "variant": "before",
+    "peak_working_set_bytes": 765861888
+  },
+  {
+    "load_ns": 562142000,
+    "allocated_bytes": 660563560,
+    "allocations": 1066669,
+    "heap_bytes": 659395192,
+    "nodes": 1000000,
+    "pair": 3,
+    "variant": "after",
+    "peak_working_set_bytes": 671096832
+  }
+]

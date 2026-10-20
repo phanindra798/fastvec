@@ -1,4 +1,5 @@
 {
+  "timing_method": "search_only_repeated_sweeps_v2",
   "implementation": "hnswlib",
   "version": "0.8.0",
   "dataset": "sift",
@@ -8,75 +9,98 @@
   "k": 10,
   "M": 16,
   "ef_construction": 200,
-  "build_seconds": 83.11916758799998,
+  "build_seconds": 97.88444140000502,
   "threads": 1,
   "sweep": [
     {
       "ef": 10,
-      "recall": 0.70804,
-      "qps": 22858.217898723244,
-      "ms_per_query": 0.04374794240000028
+      "recall": 0.7094,
+      "qps": 10301.380271759901,
+      "ms_per_query": 0.0970743699988816,
+      "timed_queries": 10000,
+      "timed_seconds": 0.9707436999888159
     },
     {
       "ef": 20,
-      "recall": 0.84017,
-      "qps": 14755.572785865996,
-      "ms_per_query": 0.06777100520000659
+      "recall": 0.83777,
+      "qps": 10871.225442691002,
+      "ms_per_query": 0.09198594999907073,
+      "timed_queries": 10000,
+      "timed_seconds": 0.9198594999907073
     },
     {
       "ef": 40,
-      "recall": 0.92784,
-      "qps": 8994.010289546986,
-      "ms_per_query": 0.11118510740000147
+      "recall": 0.92775,
+      "qps": 10059.372428004406,
+      "ms_per_query": 0.09940977999940515,
+      "timed_queries": 10000,
+      "timed_seconds": 0.9940977999940515
     },
     {
       "ef": 60,
-      "recall": 0.95997,
-      "qps": 6281.708000802554,
-      "ms_per_query": 0.1591923725000015
+      "recall": 0.9601,
+      "qps": 6721.781691569603,
+      "ms_per_query": 0.14877008000039496,
+      "timed_queries": 10000,
+      "timed_seconds": 1.4877008000039496
     },
     {
       "ef": 80,
-      "recall": 0.97537,
-      "qps": 4823.716301318133,
-      "ms_per_query": 0.20730904090000876
+      "recall": 0.97527,
+      "qps": 5355.806583351538,
+      "ms_per_query": 0.1867132400016999,
+      "timed_queries": 10000,
+      "timed_seconds": 1.8671324000169989
     },
     {
       "ef": 100,
       "recall": 0.98363,
-      "qps": 4234.2950936050165,
-      "ms_per_query": 0.2361668183000006
+      "qps": 3663.494947086183,
+      "ms_per_query": 0.2729633899987675,
+      "timed_queries": 10000,
+      "timed_seconds": 2.7296338999876752
     },
     {
       "ef": 150,
       "recall": 0.99283,
-      "qps": 2972.648181030921,
-      "ms_per_query": 0.3364003875000094
+      "qps": 2617.057789004782,
+      "ms_per_query": 0.3821084900002461,
+      "timed_queries": 10000,
+      "timed_seconds": 3.821084900002461
     },
     {
       "ef": 200,
       "recall": 0.99632,
-      "qps": 2243.924087199913,
-      "ms_per_query": 0.44564787450000265
+      "qps": 2484.5320488170028,
+      "ms_per_query": 0.402490280001075,
+      "timed_queries": 10000,
+      "timed_seconds": 4.02490280001075
     },
     {
       "ef": 300,
-      "recall": 0.99877,
-      "qps": 1514.701057515537,
-      "ms_per_query": 0.6601962776999926
+      "recall": 0.99878,
+      "qps": 2145.567715180963,
+      "ms_per_query": 0.46607710999960544,
+      "timed_queries": 10000,
+      "timed_seconds": 4.6607710999960545
     },
     {
       "ef": 500,
-      "recall": 0.99971,
-      "qps": 936.6938671197274,
-      "ms_per_query": 1.067584656100007
+      "recall": 0.99968,
+      "qps": 1410.9195949249702,
+      "ms_per_query": 0.7087576099991566,
+      "timed_queries": 10000,
+      "timed_seconds": 7.087576099991566
     }
   ],
   "env": {
+    "captured_utc": "2026-10-19T12:54:50.423964+00:00",
+    "source_state": "dirty",
+    "os": "Windows/AMD64",
     "cpu": "12th Gen Intel(R) Core(TM) i7-12650H",
-    "python": "3.12.3",
-    "numpy": "2.5.2",
-    "kernel": "6.18.33.2-microsoft-standard-WSL2",
-    "commit": "8b5fa66"
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "kernel": "11",
+    "commit": "f4ad685"
   }
 }

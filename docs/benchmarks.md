@@ -1,196 +1,147 @@
 # Benchmarks
 
-All measured on one laptop: i7-12650H, 6 P-cores + 4 E-cores, 16 GB, Ubuntu
-24.04 on WSL2, Go 1.26.5. CPU only. Absolute numbers will differ elsewhere;
-everything compared here was run in the same session.
+## Repeated measurements
 
-Datasets: SIFT-100k for the stage gates (100k base, 1000 queries, ground truth
-computed by Flat), SIFT1M for the headline figures. k=10 throughout.
+Use `py/repeat_benchmarks.py` to collect separate process runs, alternating
+Fastvec-first and hnswlib-first order. The default is five pairs (at least three
+are required). Commands run sequentially to avoid competing with each other.
+Every raw JSON is retained under `run-01`, `run-02`, etc. `summary.json` records
+the samples, median, minimum and maximum for each ef; `summary.md` is readable
+without additional tools. The output directory must be new. Failed sessions
+are marked in `session.json` and do not publish a completed summary.
 
-Distance counts come from a `-tags diagnostic` build. Timings never do.
+```powershell
+go build -o fastvec-bench.exe ./cmd/fastvec-bench
+python py/repeat_benchmarks.py --fastvec ./fastvec-bench.exe --data D:/data/siftsmall --name siftsmall --runs 5 --out bench/results/my-siftsmall-session
+```
 
-## Headline, SIFT1M
+For SIFT1M, use `--data D:/data/sift --name sift` and optionally
+`--index D:/data/sift.fvi` to reuse a validated Fastvec graph. hnswlib rebuilds
+its graph on each run, so these repetitions include graph-construction variation
+as well as query-timing variation. Build time is not included in QPS. Each median
+weights process runs equally; durations are not pooled. Min/max ranges describe
+observed spread, not confidence intervals. Five pairs alternate first position
+3:2; use an even count if equal order counts are required.
 
-Both implementations run back to back in one session, machine otherwise idle.
-Load average 0.45 at the start; fastvec held 99% of one core throughout, so
-nothing was competing. M=16, efConstruction=200, single thread.
+Completed five-pair sessions are available for
+[SIFT1M](../bench/results/repeated-sift-20261019/summary.md) and
+[SIFT-small](../bench/results/repeated-siftsmall-20261019/summary.md).
+The README now uses the repeated SIFT1M results. The original single-run
+measurements below are retained for reference, not mixed into these medians.
 
-    ef      fastvec recall / QPS      hnswlib recall / QPS      ratio
-    10      0.7099 / 13079            0.7080 / 22858            1.75x
-    20      0.8395 /  8573            0.8402 / 14756            1.72x
-    40      0.9275 /  5854            0.9278 /  8994            1.54x
-    60      0.9599 /  4109            0.9600 /  6282            1.53x
-    80      0.9754 /  3237            0.9754 /  4824            1.49x
-    100     0.9835 /  2656            0.9836 /  4234            1.59x
-    150     0.9929 /  1846            0.9928 /  2973            1.61x
-    200     0.9963 /  1415            0.9963 /  2244            1.59x
-    300     0.9987 /  1073            0.9988 /  1515            1.41x
-    500     0.9997 /   626            0.9997 /   937            1.50x
+The SIFT1M session was interrupted during the first attempt at pair 4 after an
+unexplained long delay. That attempt produced no completed JSON; pairs 1–3 were
+retained and pair 4 was restarted before completing pair 5. `session.json` retains
+the attempted command and interruption note. All five completed pairs, including
+the slower ef=100 observation in pair 4, contribute to the summary. Treat this as
+an exploratory laptop measurement, not a controlled uninterrupted experiment.
 
-Recall matches to three or four decimal places at every point. The graph is as
-good as the reference implementation; the gap is execution speed, 1.5 to 1.75x.
+![Repeated SIFT1M results](../bench/results/repeated-sift-20261019/recall-qps.png)
 
-Exact search over the same data does 12 QPS at recall 1.0000, so the index is
-roughly 220x faster than brute force at ef=100 for 1.6% of answers differing.
+Regenerate the repeated-run chart with:
 
-### Build
+```powershell
+python py/plots.py --session bench/results/repeated-sift-20261019
+```
 
-    fastvec   11m12s at   99% CPU  =  672 core-seconds
-    hnswlib     83.1s at 1100% CPU  =  914 core-seconds
+Both sessions used the environment and hnswlib package described below. The
+same Fastvec executable and SIFT1M cache were reused from the original run.
+Each session retains its actual command order and each raw result's environment
+metadata. The existing measurement-environment.json hashes describe the original
+run's sources and datasets; they are not a snapshot of subsequently added tooling.
 
-hnswlib is 8x faster on the clock because it inserts across eleven cores. Per
-core it does 26% more work than this build does. The wall-clock gap is entirely
-parallelism, not inefficiency, and parallel insert is the obvious next step.
+## Original single paired run
 
-Peak RSS 1.21 GB. Levels [1000000 62356 3994 246 26 2], degree min=1 max=32
-mean=21.1, and the bottom layer is one reachable set covering all 1,000,000.
+Measured on 2026-10-19 using `search_only_repeated_sweeps_v2`, with
+search and recall evaluation timed separately. SIFT1M contains one million
+128-dimensional vectors and 10,000 queries. Both implementations use M=16,
+efConstruction=200, k=10, and one query thread.
 
-### An earlier run of this was wrong
+## SIFT1M
 
-The first SIFT1M measurement reported 3x slower than hnswlib. That run averaged
-29% CPU over 86 minutes because something else was using the machine, and it
-predated the AVX2 kernel. It also compared against hnswlib numbers taken ten
-days earlier under unknown conditions.
+| ef | Fastvec recall@10 | Fastvec QPS | hnswlib recall@10 | hnswlib QPS |
+|---:|---:|---:|---:|---:|
+| 10 | 0.7099 | 27,837 | 0.7094 | 10,301 |
+| 20 | 0.8395 | 16,734 | 0.8378 | 10,871 |
+| 40 | 0.9275 | 9,999 | 0.9277 | 10,059 |
+| 60 | 0.9599 | 6,603 | 0.9601 | 6,722 |
+| 80 | 0.9754 | 5,489 | 0.9753 | 5,356 |
+| 100 | 0.9835 | 4,474 | 0.9836 | 3,663 |
+| 150 | 0.9929 | 3,161 | 0.9928 | 2,617 |
+| 200 | 0.9963 | 2,439 | 0.9963 | 2,485 |
+| 300 | 0.9987 | 1,730 | 0.9988 | 2,146 |
+| 500 | 0.9997 | 1,067 | 0.9997 | 1,411 |
 
-Both of those are why this one runs the two implementations minutes apart on an
-idle machine and records load average and CPU percentage alongside the results.
+![SIFT1M](../bench/plots/recall-qps-sift.png)
 
-## Exact search
+## SIFT-small
 
-Flat, 100k x 128, single thread, three runs: 8.98 / 8.41 / 8.28 ms.
+| ef | Fastvec recall@10 | Fastvec QPS | hnswlib recall@10 | hnswlib QPS |
+|---:|---:|---:|---:|---:|
+| 10 | 0.9400 | 138,266 | 0.9440 | 132,905 |
+| 20 | 0.9800 | 86,478 | 0.9850 | 83,115 |
+| 40 | 0.9960 | 41,701 | 0.9960 | 49,437 |
+| 60 | 0.9970 | 31,758 | 0.9970 | 35,482 |
+| 80 | 0.9980 | 23,746 | 0.9980 | 28,028 |
+| 100 | 0.9980 | 19,815 | 0.9980 | 23,541 |
+| 150 | 1.0000 | 13,896 | 1.0000 | 18,232 |
+| 200 | 1.0000 | 8,079 | 1.0000 | 13,822 |
+| 300 | 1.0000 | 7,568 | 1.0000 | 10,796 |
+| 500 | 1.0000 | 4,626 | 1.0000 | 7,121 |
 
-    workers   1      2      4      6      8      12     16
-    ms      7.97   3.94   2.44   1.95   2.21   1.92   1.75
+![SIFT-small](../bench/plots/recall-qps-siftsmall.png)
 
-8 workers beats 12 and loses to 6. Six P-cores, four E-cores, and the merge
-waits for the slowest. 4.56x from 16 threads, not 16x: each query moves 51 MB in
-1.75 ms, about 29 GB/s, near what the memory delivers.
+## Method and limitations
 
-SIFT1M: 10,000 queries in 2m45s, 16.5 ms each, 60 QPS on 16 threads, 12 on one.
-Recall 1.0000 against the shipped ground truth.
+Both runners time whole search-only sweeps, doubling repetitions until the
+attempt lasts at least 100 ms. Only the final attempt contributes to QPS.
+JSON records the measured query count and duration. Recall is evaluated in a
+separate pass. Repeated sweeps measure a warmed workload.
 
-## Stage 1, flat graph
+Go's individual latency samples in this environment are visibly quantized
+(including zero samples and approximately 1 ms increments). Do not use these
+percentiles as precise latency estimates. Aggregate throughput uses longer
+intervals and does not average those individual samples.
 
-Pruning at M instead of MMax orphaned nearly a quarter of the graph:
+These are single paired runs, without confidence intervals or verified idle
+machine conditions. Throughput varies across settings; these results do not
+establish a universal speed advantage. Go calls Search per query; Python uses
+hnswlib's batch API, so API overhead and allocations remain included.
 
-    prune at        M          2M
-    orphans     23,214          4
-    recall       0.6084     0.9863
+The SIFT1M Fastvec graph was loaded from an existing cache and validated against
+every input vector and persisted construction parameter. Its `build_seconds: 0`
+means no build was measured, not a free build. Format v1 does not record the
+original build worker count. hnswlib built a new graph; build times are therefore
+not directly comparable. SIFT-small built fresh graphs for both implementations.
+No new Flat, FAISS, memory-usage or distance-kernel benchmark was performed.
 
-Sweep with MMax = 2M, SIFT-100k:
+## Environment and reproduction
 
-    ef        10      20      50     100     200
-    recall  0.682   0.837   0.950   0.986   0.996
-    QPS     10248    6755    3744    2340    1393
+Native Windows/amd64, Intel Core i7-12650H (16 logical CPUs), Go 1.26.5 with
+AVX2 enabled, Python 3.12.14, NumPy 2.3.5 and hnswlib 0.8.0. Query threads: one.
+Run order: Fastvec SIFT-small, hnswlib SIFT-small, Fastvec SIFT1M, hnswlib SIFT1M.
+Raw JSON includes UTC timestamps and reports the source checkout as dirty at
+commit `f4ad685`; the commit alone does not identify the measured source.
+`bench/results/measurement-environment.json` records source and dataset hashes.
 
-## Stage 2, layers
+hnswlib used the prebuilt conda-forge Windows Python 3.12 package
+`hnswlib-0.8.0-py312h9b46583_2.conda`, SHA256
+`3a4510cbe62013478b171496a7bc362abf629b04a6db8ffa8a502607f3ef1e47`, from
+[conda-forge](https://conda.anaconda.org/conda-forge/win-64/hnswlib-0.8.0-py312h9b46583_2.conda).
+Compiler settings are those of that package; they are not assumed equivalent
+to the historical Linux build.
 
-Level sizes [100000 6201 397 17 2], shrinking by roughly M each step up.
+From the repository root, with datasets and dependencies available:
 
-    ef=20    single 0.8369, 550 dist    layered 0.8550, 481 dist
-    ef=50    single 0.9500, 909 dist    layered 0.9470, 831 dist
-    ef=100   single 0.9863, 1407 dist   layered 0.9756, 1327 dist
+```powershell
+go run ./cmd/fastvec-bench -data D:/data/siftsmall -name siftsmall -out bench/results
+python py/bench_baselines.py --data D:/data/siftsmall --name siftsmall --out bench/results
+go run ./cmd/fastvec-bench -data D:/data/sift -name sift -index D:/data/sift.fvi -out bench/results
+python py/bench_baselines.py --data D:/data/sift --name sift --out bench/results
+python py/plots.py
+```
 
-Layers touch 6-13% fewer nodes. They also broke the graph:
-
-    single layer   5 components, largest 99,996 of 100,000   ( 0.0% stranded)
-    layered        6 components, largest 54,217 of 100,000   (45.8% stranded)
-
-Same data, same seed, only the hierarchy differs. Recall survived at 0.9756
-because the components are spatially coherent and the descent drops a query into
-the region its neighbours live in. Queries near a boundary lose the neighbours
-across it, which is the 1% gap against the flat build.
-
-## Stage 3, neighbour heuristic
-
-                     components   stranded   build
-    nearest-M          6           45.8%     50.4s
-    heuristic          1            0.0%     56.1s
-
-    ef      nearest-M                  heuristic
-    20      0.8550,  481 dist          0.9046,  459 dist
-    50      0.9470,  831 dist          0.9793,  851 dist
-    100     0.9756, 1327 dist          0.9961, 1421 dist
-
-One component holding all 100,000 nodes. Recall at ef=100 went 0.9756 to 0.9961,
-past the flat build's 0.9863.
-
-At equal ef the heuristic touches 7% more nodes. At equal recall it touches far
-fewer: nearest-M never reaches 0.979 anywhere in the sweep, its best being
-0.9756 at 1327 distances, and the heuristic beats that at ef=50 using 851. Same
-accuracy, 36% less work.
-
-Degree min fell from 16 to 2, mean from 25.0 to 19.8. The heuristic rejects
-candidates, so the graph came out sparser and better connected at once.
-
-## AVX2 distance kernel
-
-Same public function, matched benchmarks, two builds. `-tags purego` compiles
-the assembly out entirely.
-
-    scalar   80.09 / 81.50 / 81.74 / 82.17 / 82.41 ns
-    avx2     12.25 / 12.57 / 12.71 / 12.72 / 14.07 ns
-
-6.4x on the kernel, median to median, 128 dimensions.
-
-End to end on SIFT-100k, same index, k=10:
-
-    ef       scalar QPS   avx2 QPS   speedup   recall
-    20            7,288     14,475     1.99x   0.9046 both
-    100           2,020      3,788     1.88x   0.9961 both
-    200           1,152      2,135     1.85x   0.9992 both
-
-Recall identical at every point, so the kernel changed speed and nothing else.
-
-6.4x on one part turning into 1.88x overall puts that part at about 55% of
-search time before, roughly 15% after. The rest is heap operations, visited set
-checks, and cache misses walking the graph.
-
-Correctness: worst relative error against scalar was 1.64e-06 over 6500 random
-pairs across 14 dimension sizes. Across 2000 trials the kernel never disagreed
-with scalar about which of two vectors was nearer, which is the property that
-actually matters.
-
-## Index persistence
-
-    save   58 MB for the 100k index
-    load   164 ms
-
-Before the buffered word reader it was 613 ms, because binary.Read was being
-called once per value and SIFT1M holds about 150 million of them.
-
-SIFT1M loads in roughly 2 seconds against an 11 minute rebuild, which is what
-makes re-measuring on an idle machine practical.
-
-## Parallel build
-
-SIFT-100k, sequential against all 16 workers, same seed and parameters.
-
-    build      32.9s to 3.79s        8.7x
-    stranded   0 to 284 nodes        0.28% of the graph
-    levels     identical
-
-    ef      sequential            parallel
-    20      0.9046 / 16773 QPS    0.9013 / 16973 QPS
-    100     0.9961 /  4397 QPS    0.9925 /  4342 QPS
-    200     0.9992 /  2435 QPS    0.9957 /  2335 QPS
-
-A third of a point of recall at every setting, matching the stranded fraction,
-so it is a real cost rather than noise. Query throughput is unaffected.
-
-The cause is inherent: sequentially a node is inserted into a graph where
-everything before it is fully linked, in parallel many nodes are half linked at
-once, so a new node searches an incomplete graph and picks worse neighbours.
-
-Default stays sequential, since that is the only mode that produces the same
-index twice.
-
-## SIFT-100k summary
-
-k=10, single thread:
-
-                        recall    QPS    dist/query
-    Flat (exact)        1.0000     92      100,000
-    stage 1 flat graph  0.9863   2340        1,407
-    stage 2 layered     0.9756   2563        1,327
-    stage 3 heuristic   0.9961   2302        1,421
+The archived [historical measurements](benchmarks-historical.md) used different
+timing and environment conditions. Their JSON and plots are preserved under
+`bench/results/historical` and `bench/plots/historical`. Do not use the change
+between historical and current QPS as an implementation speedup measurement.

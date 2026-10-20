@@ -3,57 +3,62 @@
 Vector similarity search engine, written from scratch in Go.
 
 Implementing HNSW from the paper rather than calling a library, and benchmarking
-it against hnswlib and FAISS on SIFT1M with everything running on a laptop CPU.
+it against hnswlib on SIFT1M with everything running on a laptop CPU.
+A FAISS comparison is planned.
 
 ## Results
 
-One million 128-dimensional vectors, single thread. Both implementations run
-back to back in the same session on an idle machine.
+Five paired SIFT1M runs on 2026-10-19 using `search_only_repeated_sweeps_v2`.
+One million 128-dimensional vectors, 10,000 queries, M=16,
+efConstruction=200, k=10, and one query thread. Search timing excludes recall
+evaluation. Run order alternates between implementations.
 
-![recall against throughput](bench/plots/recall-qps-sift.png)
+![Median recall and throughput with observed ranges](bench/results/repeated-sift-20261019/recall-qps.png)
 
-    ef      fastvec recall / QPS      hnswlib recall / QPS      ratio
-    10      0.7099 / 13079            0.7080 / 22858            1.75x
-    60      0.9599 /  4109            0.9600 /  6282            1.53x
-    100     0.9835 /  2656            0.9836 /  4234            1.59x
-    500     0.9997 /   626            0.9997 /   937            1.50x
+| ef | Fastvec recall | Fastvec median QPS [min–max] | hnswlib recall | hnswlib median QPS [min–max] |
+|---:|---:|---:|---:|---:|
+| 10 | 0.7099 | 28,979 [26,833–29,575] | 0.7090 | 28,696 [28,194–30,215] |
+| 60 | 0.9599 | 7,551 [7,481–7,682] | 0.9598 | 9,021 [8,529–9,078] |
+| 100 | 0.9835 | 4,808 [4,737–4,879] | 0.9836 | 5,783 [3,964–5,808] |
+| 500 | 0.9997 | 1,119 [1,101–1,140] | 0.9997 | 1,442 [1,399–1,450] |
 
-Recall matches to three or four decimal places at every point in the sweep, so
-the graph this builds is as good as the reference implementation's. The gap is
-execution speed, 1.5 to 1.75x.
+Recall columns show medians. Brackets show the observed minimum and maximum
+across five runs, not confidence intervals. Machine idleness was not verified.
+An unfinished fourth-pair attempt was interrupted after an unexplained long delay
+and restarted; the session report records this interruption.
+Go calls Search per query; Python uses hnswlib's batch API, so API overhead and
+allocations remain included. These measurements do not establish a universal
+speed advantage.
 
-Exact search over the same data does 12 queries/sec at recall 1.000, so the
-index is around 220x faster than brute force at ef=100 for 1.6% of answers
-differing.
-
-### Build time
-
-    fastvec   11m12s at   99% CPU  =  672 core-seconds
-    hnswlib     83.1s at 1100% CPU  =  914 core-seconds
-
-hnswlib is 8x faster on the clock because it inserts across eleven cores. Per
-core this build does 26% less work than theirs, so the gap is parallelism rather
-than inefficiency.
-
-`BuildWorkers` inserts across goroutines and closes most of it: on SIFT-100k,
-32.9s down to 3.79s, 8.7x. It costs 0.36 recall points, because a node inserted
-while its neighbourhood is still half linked picks worse neighbours. Sequential
-stays the default, since it is the only mode that produces the same index twice.
-
-### Distance kernel
-
-The distance function is hand-written AVX2 in Go assembly, since Go cannot emit
-vector instructions from normal code. 6.4x on the kernel, 1.9x on a whole
-search, recall unchanged. The gap between those two puts distance computation at
-roughly 55% of search time before and 15% after.
-
-Build with `-tags purego` to compile the assembly out and compare.
+Fastvec reused the same validated SIFT1M index; hnswlib rebuilt its graph each
+run. Variation therefore includes graph construction for hnswlib. No build-time
+comparison is claimed. Full samples, recall ranges and commands are retained in
+the [SIFT1M session](bench/results/repeated-sift-20261019/summary.md).
+The [five-pair SIFT-small report](bench/results/repeated-siftsmall-20261019/summary.md)
+and [methodology](docs/benchmarks.md) provide additional context.
 
 ## What is implemented here
 
+[Search profiling](docs/search-profiling.md) records the measured CPU costs and
+the result-sorting change that reduces query allocations from three to one.
+A compact bottom-layer layout also reduced median query time by 4.0% at ef=100
+and 6.5% at ef=500 in three local before/after pairs, with identical search results.
+The report documents retained and temporary memory costs. The repeated benchmark
+figures above predate these changes.
+
+The [two-pass loader](docs/load-profiling.md) fills compact graph storage directly
+for seekable inputs. In three local SIFT1M pairs, median peak process memory fell
+12.4% and load time fell 4.0%; streaming inputs retain the original loading path.
+An explicit `LoadOptions{SinglePass: true}` option avoids graph rereads when
+read bandwidth matters more than temporary memory; see the loader report for
+the controlled slow-read simulation and its limits.
+For the benchmark CLI, select `-index-load-policy auto` (default) or
+`-index-load-policy single-pass`. Results record the requested policy; it only
+affects loading an existing index cache.
+
 No third-party libraries on the query path. The `.fvecs` parser, distance
 kernels, top-k heap, graph construction, search, and on-disk format are all in
-this repository. hnswlib and FAISS appear only as benchmark opponents.
+this repository. hnswlib is used only as a benchmark opponent.
 
 Go standard library only, plus CPU feature detection written by hand rather than
 pulled from `golang.org/x/sys`.
@@ -65,15 +70,29 @@ pulled from `golang.org/x/sys`.
     make baseline      # hnswlib on the same data
     make plots         # draw both curves
 
-Benchmarks reuse a saved index, so a re-measure costs seconds rather than the
-11 minute build. Datasets are not in the repo; see `data/README.md`.
+CI runs the short Go suite on Linux and Windows in default, `purego`, and
+`diagnostic` builds, plus a Linux race-detector job and Python timing tests.
+The short suite includes synthetic recall checks against exact Flat search:
+uniform, clustered, and duplicate vectors, three seeds, and sequential/four-worker
+builds. No dataset download is needed. These regression checks require recall@10
+of at least 0.95 sequentially and 0.90 in parallel; they do not replace SIFT
+measurements. Dataset-dependent tests remain available through `make test`.
+
+Benchmarks can reuse a saved index to avoid rebuilding the graph. Datasets are not in the repo; see `data/README.md`.
+
+Before reusing an index, the benchmark checks its stored construction settings
+and compares every vector against the requested dataset, including row order.
+A mismatch returns an error; choose a different `-index` path or remove the old
+cache to rebuild. Changing query-time `efSearch` does not require rebuilding.
+This check works with existing index files. Format v1 does not record the build
+worker count, so cache validation cannot verify that part of build provenance.
 
 ## Machine
 
-Everything measured on one laptop: i7-12650H, 6 P-cores + 4 E-cores, 16 GB,
-Ubuntu 24.04 on WSL2, Go 1.26.5. CPU only. Absolute numbers will differ
-elsewhere; everything compared was run in the same session.
+The current results use native Windows/amd64 on an Intel Core i7-12650H,
+Go 1.26.5, Python 3.12.14 and hnswlib 0.8.0. CPU only, one query thread.
+Historical WSL2 results are archived separately.
 
-Full numbers in `docs/benchmarks.md`, reasoning in `docs/decisions.md`.
+Full numbers in [benchmarks](docs/benchmarks.md), reasoning in `docs/decisions.md`.
 
 MIT licence.

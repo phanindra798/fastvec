@@ -1,0 +1,141 @@
+{
+  "timing_method": "search_only_repeated_sweeps_v2",
+  "avx2": true,
+  "implementation": "fastvec",
+  "dataset": "sift",
+  "base_count": 1000000,
+  "dim": 128,
+  "queries": 10000,
+  "k": 10,
+  "M": 16,
+  "MMax0": 32,
+  "ef_construction": 200,
+  "seed": 42,
+  "build_seconds": 0,
+  "threads": 1,
+  "sweep": [
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 0.3484877,
+      "ef": 10,
+      "recall": 0.70995,
+      "qps": 28695.41737054134,
+      "ms_per_query": 0.03484877,
+      "p50_ms": 0,
+      "p95_ms": 0,
+      "p99_ms": 1.0023
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 0.5510922,
+      "ef": 20,
+      "recall": 0.83946,
+      "qps": 18145.783954118746,
+      "ms_per_query": 0.05510922000000001,
+      "p50_ms": 0,
+      "p95_ms": 0.8997,
+      "p99_ms": 1.0592
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 0.9502857,
+      "ef": 40,
+      "recall": 0.92752,
+      "qps": 10523.151090245807,
+      "ms_per_query": 0.09502857,
+      "p50_ms": 0,
+      "p95_ms": 0.9999,
+      "p99_ms": 1.1117
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 1.3054437,
+      "ef": 60,
+      "recall": 0.95994,
+      "qps": 7660.230770580148,
+      "ms_per_query": 0.13054437,
+      "p50_ms": 0,
+      "p95_ms": 1.0008,
+      "p99_ms": 1.1198
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 1.6840015,
+      "ef": 80,
+      "recall": 0.97541,
+      "qps": 5938.236990881541,
+      "ms_per_query": 0.16840015,
+      "p50_ms": 0,
+      "p95_ms": 1.0053,
+      "p99_ms": 1.2789
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 2.0661091,
+      "ef": 100,
+      "recall": 0.98353,
+      "qps": 4840.015466753426,
+      "ms_per_query": 0.20661090999999998,
+      "p50_ms": 0,
+      "p95_ms": 1.0073,
+      "p99_ms": 1.5038
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 2.9354,
+      "ef": 150,
+      "recall": 0.99288,
+      "qps": 3406.690740614567,
+      "ms_per_query": 0.29354,
+      "p50_ms": 0,
+      "p95_ms": 1.0385,
+      "p99_ms": 1.505
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 4.0753723,
+      "ef": 200,
+      "recall": 0.99629,
+      "qps": 2453.7635494062715,
+      "ms_per_query": 0.40753723,
+      "p50_ms": 0,
+      "p95_ms": 1.0983,
+      "p99_ms": 1.5088
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 5.5447806,
+      "ef": 300,
+      "recall": 0.99872,
+      "qps": 1803.4978696902813,
+      "ms_per_query": 0.55447806,
+      "p50_ms": 0.9357,
+      "p95_ms": 1.1113,
+      "p99_ms": 1.6003
+    },
+    {
+      "timed_queries": 10000,
+      "timed_seconds": 8.7822226,
+      "ef": 500,
+      "recall": 0.99968,
+      "qps": 1138.6639186303476,
+      "ms_per_query": 0.8782222600000001,
+      "p50_ms": 0.9998,
+      "p95_ms": 1.5056,
+      "p99_ms": 2.0014
+    }
+  ],
+  "env": {
+    "captured_utc": "2026-10-19T13:46:19Z",
+    "source_state": "dirty",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12650H",
+    "logical_cpus": 16,
+    "gomaxprocs": 1,
+    "go_version": "go1.26.5",
+    "os": "windows/amd64",
+    "kernel": "unknown",
+    "load_at_start": "unknown",
+    "commit": "f4ad685",
+    "build_tags": []
+  }
+}

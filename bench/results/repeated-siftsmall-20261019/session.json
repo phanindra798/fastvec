@@ -1,0 +1,148 @@
+{
+  "started_utc": "2026-10-19T13:04:09.004266+00:00",
+  "status": "complete",
+  "runs": 5,
+  "commands": [
+    {
+      "run": 1,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "bench/results/repeated-siftsmall-20261019/run-01"
+      ]
+    },
+    {
+      "run": 1,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "bench/results/repeated-siftsmall-20261019/run-01"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "bench/results/repeated-siftsmall-20261019/run-02"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "bench/results/repeated-siftsmall-20261019/run-02"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "bench/results/repeated-siftsmall-20261019/run-03"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "bench/results/repeated-siftsmall-20261019/run-03"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "bench/results/repeated-siftsmall-20261019/run-04"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "bench/results/repeated-siftsmall-20261019/run-04"
+      ]
+    },
+    {
+      "run": 5,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "bench/results/repeated-siftsmall-20261019/run-05"
+      ]
+    },
+    {
+      "run": 5,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "bench/results/repeated-siftsmall-20261019/run-05"
+      ]
+    }
+  ],
+  "path_note": "Local executable paths are represented by command names; repository paths are relative to its root. Argument order, dataset paths and measurements are unchanged."
+}

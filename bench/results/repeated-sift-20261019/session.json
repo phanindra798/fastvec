@@ -1,0 +1,178 @@
+{
+  "started_utc": "2026-10-19T13:09:28.093910+00:00",
+  "status": "complete",
+  "runs": 5,
+  "commands": [
+    {
+      "run": 1,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\sift",
+        "-name",
+        "sift",
+        "-out",
+        "bench/results/repeated-sift-20261019/run-01",
+        "-index",
+        "D:\\data\\sift.fvi"
+      ]
+    },
+    {
+      "run": 1,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-01"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-02"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\sift",
+        "-name",
+        "sift",
+        "-out",
+        "bench/results/repeated-sift-20261019/run-02",
+        "-index",
+        "D:\\data\\sift.fvi"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:\\data\\sift",
+        "-name",
+        "sift",
+        "-out",
+        "bench/results/repeated-sift-20261019/run-03",
+        "-index",
+        "D:\\data\\sift.fvi"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-03"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:\\data\\sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-04"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:/data/sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-04"
+      ],
+      "after_interruption": true
+    },
+    {
+      "run": 4,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:/data/sift",
+        "-name",
+        "sift",
+        "-index",
+        "D:/data/sift.fvi",
+        "-out",
+        "bench/results/repeated-sift-20261019/run-04"
+      ],
+      "after_interruption": true
+    },
+    {
+      "run": 5,
+      "implementation": "fastvec",
+      "argv": [
+        "fastvec-bench",
+        "-data",
+        "D:/data/sift",
+        "-name",
+        "sift",
+        "-index",
+        "D:/data/sift.fvi",
+        "-out",
+        "bench/results/repeated-sift-20261019/run-05"
+      ],
+      "after_interruption": true
+    },
+    {
+      "run": 5,
+      "implementation": "hnswlib",
+      "argv": [
+        "python",
+        "-u",
+        "py/bench_baselines.py",
+        "--data",
+        "D:/data/sift",
+        "--name",
+        "sift",
+        "--out",
+        "bench/results/repeated-sift-20261019/run-05"
+      ],
+      "after_interruption": true
+    }
+  ],
+  "interruption": "Pair 4 hnswlib attempt interrupted after a long output gap; on cancellation it reported build_seconds=1454.2 and partial ef10/20 results. No completed raw JSON was produced. Pairs 1\u20133 retained; pair 4 restarted and pair 5 completed afterward. Cause of delay unknown.",
+  "path_note": "Local executable paths are represented by command names; repository paths are relative to its root. Argument order, dataset paths and measurements are unchanged."
+}
