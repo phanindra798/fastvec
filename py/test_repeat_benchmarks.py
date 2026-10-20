@@ -13,6 +13,15 @@ def run(qps=100):
 
 
 class SummaryTests(unittest.TestCase):
+    def test_rejects_invalid_counts_before_division(self):
+        for key in ('queries', 'dim', 'base_count', 'k', 'threads'):
+            for value in (0, -1, True, 1.5):
+                runs = [run(), run(), run()]
+                for item in runs:
+                    item[key] = value
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    summarize(runs)
+
     def test_load_policy_is_retained_and_cannot_be_mixed(self):
         runs = [run(), run(), run()]
         for item in runs:

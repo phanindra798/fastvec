@@ -32,7 +32,7 @@ func (f *Flat) Search(q []float32, k int) ([]topk.Result, error) {
 		return nil, err
 	}
 
-	c := topk.New(k)
+	c := topk.New(min(k, f.Len()))
 	f.scan(q, 0, f.Len(), c)
 	return c.Results(), nil
 }
@@ -53,6 +53,10 @@ func (f *Flat) SearchN(q []float32, k, workers int) ([]topk.Result, error) {
 	}
 
 	n := f.Len()
+	k = min(k, n)
+	if n == 0 {
+		return []topk.Result{}, nil
+	}
 	if workers < 2 || n < workers {
 		return f.Search(q, k)
 	}

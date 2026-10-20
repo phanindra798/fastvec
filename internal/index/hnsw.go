@@ -485,6 +485,11 @@ func (h *HNSW) descend(q []float32, ep int32, level int, w *workspace) int32 {
 // skip leaves one node out of the results, used while building so a vector
 // doesn't become its own neighbour. Pass -1 when querying.
 func (h *HNSW) searchLayer(q []float32, ep int32, ef, level int, skip int32, w *workspace) []topk.Result {
+	// There cannot be more results than nodes. Bound scratch allocation even
+	// when a caller or persisted index requests an enormous search width.
+	if ef > h.Len() {
+		ef = h.Len()
+	}
 	w.begin(h.Len(), ef)
 
 	d := h.measure(q, ep, w)

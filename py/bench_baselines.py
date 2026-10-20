@@ -17,6 +17,7 @@ import hnswlib
 import numpy as np
 
 from benchmark_timing import measure_throughput
+from benchmark_metadata import package_version
 
 
 def read_fvecs(path):
@@ -128,7 +129,7 @@ def main():
     out = {
         "timing_method": "search_only_repeated_sweeps_v2",
         "implementation": "hnswlib",
-        "version": hnswlib.__version__ if hasattr(hnswlib, "__version__") else "0.8.0",
+        "version": package_version(hnswlib, "hnswlib"),
         "dataset": args.name,
         "base_count": int(n),
         "dim": int(dim),

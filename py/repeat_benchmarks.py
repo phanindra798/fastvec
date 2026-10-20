@@ -29,6 +29,9 @@ def summarize(runs):
     if not efs or len(set(efs)) != len(efs):
         raise ValueError("empty or duplicate ef sweep")
     for run in runs:
+        for key in ('base_count', 'dim', 'queries', 'k', 'M', 'ef_construction', 'threads'):
+            if type(run[key]) is not int or run[key] <= 0:
+                raise ValueError(f"invalid {key}: expected a positive integer")
         if run.get("index_load_policy") != first.get("index_load_policy"):
             raise ValueError("incompatible index_load_policy")
         for key in (*MATCH_KEYS, "implementation"):
@@ -42,7 +45,7 @@ def summarize(runs):
             if p["qps"] <= 0 or not 0 <= p["recall"] <= 1 or p["timed_seconds"] < .1:
                 raise ValueError("invalid measurement")
             count = p["timed_queries"]
-            if not isinstance(count, int) or count <= 0 or count % run["queries"]:
+            if type(count) is not int or count <= 0 or count % run["queries"]:
                 raise ValueError("invalid timed query count")
             if not math.isclose(p["qps"], count / p["timed_seconds"], rel_tol=1e-8):
                 raise ValueError("inconsistent throughput")

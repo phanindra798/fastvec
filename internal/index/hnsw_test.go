@@ -1,12 +1,54 @@
 package index
 
 import (
+	"bytes"
 	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/phanindra798/fastvec/internal/fvecs"
 )
+
+func TestOversizedSearchWidthsUseBoundedWorkspace(t *testing.T) {
+	set := smallSet(t, [][]float32{{0}, {1}, {2}})
+	flat := NewFlat(set)
+	for _, workers := range []int{1, 2} {
+		got, err := flat.SearchN([]float32{2}, int(^uint(0)>>1), workers)
+		if err != nil || len(got) != 3 || got[0].ID != 2 {
+			t.Fatalf("flat workers=%d: %v, %v", workers, got, err)
+		}
+	}
+	p := DefaultParams()
+	p.EfConstruct = int(^uint(0) >> 1)
+	h, err := BuildHNSW(set, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.SetEfSearch(int(^uint(0) >> 1))
+	got, err := h.Search([]float32{2}, int(^uint(0)>>1))
+	if err != nil || len(got) != 3 || got[0].ID != 2 {
+		t.Fatalf("got %v, %v", got, err)
+	}
+	w := h.pool.Get().(*workspace)
+	if w.res.Cap() > h.Len() {
+		t.Fatalf("scratch capacity %d exceeds node count", w.res.Cap())
+	}
+	h.pool.Put(w)
+	// Also exercise an oversized persisted search width without huge datasets.
+	h.SetEfSearch(1 << 30)
+	var saved bytes.Buffer
+	if err := h.Save(&saved); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := LoadHNSW(&saved)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err = loaded.Search([]float32{2}, 10)
+	if err != nil || len(got) != 3 || got[0].ID != 2 {
+		t.Fatalf("loaded: %v, %v", got, err)
+	}
+}
 
 func buildFromSift100k(t *testing.T, p Params) *HNSW {
 	t.Helper()
