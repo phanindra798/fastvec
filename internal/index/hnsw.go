@@ -29,6 +29,11 @@ type HNSW struct {
 	// present only at the bottom has one entry.
 	links [][][]int32
 
+	// Immutable bottom-layer storage and offsets avoid following the outer
+	// node/level slice headers during queries. links shares this same storage.
+	bottom        []int32
+	bottomOffsets []int
+
 	m     int // neighbours chosen for a new node
 	mMax  int // cap on a list above level 0
 	mMax0 int // cap at level 0, where every node lives
@@ -88,11 +93,23 @@ func DefaultParams() Params {
 func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 	// Node 0 is the first entry point, so with nothing to index every search
 	// would read a vector that isn't there.
-	if set.Dim < 1 || set.Len() < 1 {
+	if set == nil {
+		return nil, fmt.Errorf("vector dataset must not be nil")
+	}
+	if set.Dim < 1 {
+		return nil, fmt.Errorf("vector dimension must be positive, got %d", set.Dim)
+	}
+	if len(set.Data)%set.Dim != 0 {
+		return nil, fmt.Errorf("%d values do not form complete vectors of dimension %d", len(set.Data), set.Dim)
+	}
+	if set.Len() < 1 {
 		return nil, fmt.Errorf("need at least one vector, got %d of dimension %d", set.Len(), set.Dim)
 	}
-	if p.M < 1 {
-		return nil, fmt.Errorf("M must be at least 1, got %d", p.M)
+	if set.Len() > math.MaxInt32 {
+		return nil, fmt.Errorf("vector count exceeds int32 node ID limit")
+	}
+	if p.M < 2 {
+		return nil, fmt.Errorf("M must be at least 2, got %d", p.M)
 	}
 	if p.EfConstruct < p.M {
 		return nil, fmt.Errorf("efConstruction (%d) must be at least M (%d)", p.EfConstruct, p.M)
@@ -101,6 +118,9 @@ func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 		p.MMax = p.M
 	}
 	if p.MMax0 == 0 {
+		if p.M > int(^uint(0)>>1)/2 {
+			return nil, fmt.Errorf("M is too large to compute default MMax0")
+		}
 		p.MMax0 = 2 * p.M
 	}
 	if p.MMax < p.M || p.MMax0 < p.M {
@@ -138,7 +158,25 @@ func BuildHNSW(set *fvecs.Float, p Params) (*HNSW, error) {
 			h.insert(int32(i))
 		}
 	}
+	h.compactBottom()
 	return h, nil
+}
+
+// compactBottom preserves edge order and shares the packed storage with links
+// so persistence and graph diagnostics use exactly the same adjacency lists.
+// Call only once construction has finished and before publishing the index.
+func (h *HNSW) compactBottom() {
+	offsets := make([]int, len(h.links)+1)
+	for i, levels := range h.links {
+		offsets[i+1] = offsets[i] + len(levels[0])
+	}
+	packed := make([]int32, offsets[len(h.links)])
+	for i, levels := range h.links {
+		lo, hi := offsets[i], offsets[i+1]
+		copy(packed[lo:hi], levels[0])
+		h.links[i][0] = packed[lo:hi:hi]
+	}
+	h.bottom, h.bottomOffsets = packed, offsets
 }
 
 // buildParallel inserts across several goroutines.
@@ -330,6 +368,10 @@ func (h *HNSW) setOwn(id int32, level int, nbs []int32) {
 // nothing. During a build another worker may be appending to it, so the list is
 // copied into the caller's scratch buffer under the node's lock.
 func (h *HNSW) neighbours(id int32, level int, scratch []int32) []int32 {
+	if level == 0 && h.bottomOffsets != nil {
+		lo, hi := h.bottomOffsets[id], h.bottomOffsets[id+1]
+		return h.bottom[lo:hi:hi]
+	}
 	if !h.building {
 		return h.links[id][level]
 	}

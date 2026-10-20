@@ -121,6 +121,12 @@ func TestReadFloatRejectsBadFiles(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected an error, got nil")
 			}
+			if tt.name == "missing" {
+				if !os.IsNotExist(err) {
+					t.Errorf("expected a missing-file error, got %v", err)
+				}
+				return
+			}
 			if !strings.Contains(err.Error(), tt.want) {
 				t.Errorf("error %q does not mention %q", err, tt.want)
 			}

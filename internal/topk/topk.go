@@ -1,7 +1,7 @@
 // Package topk keeps the k nearest results seen during a scan.
 package topk
 
-import "sort"
+import "slices"
 
 type Result struct {
 	ID   int32
@@ -79,7 +79,15 @@ func (c *Collector) Add(id int32, dist float32) {
 func (c *Collector) Results() []Result {
 	out := make([]Result, len(c.items))
 	copy(out, c.items)
-	sort.Slice(out, func(i, j int) bool { return Before(out[i], out[j]) })
+	slices.SortFunc(out, func(a, b Result) int {
+		if Before(a, b) {
+			return -1
+		}
+		if Before(b, a) {
+			return 1
+		}
+		return 0
+	})
 	return out
 }
 

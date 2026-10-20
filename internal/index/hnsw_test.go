@@ -155,6 +155,42 @@ func TestHNSWRejectsBadInput(t *testing.T) {
 	}
 }
 
+func TestHNSWValidatesDatasetBeforeUse(t *testing.T) {
+	for name, set := range map[string]*fvecs.Float{
+		"nil":                nil,
+		"zero dimension":     {Data: []float32{1}},
+		"negative dimension": {Dim: -1, Data: []float32{1}},
+		"incomplete vector":  {Dim: 3, Data: []float32{1, 2, 3, 4, 5}},
+		"empty":              {Dim: 3},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if h, err := BuildHNSW(set, DefaultParams()); err == nil || h != nil {
+				t.Fatalf("invalid dataset accepted: %v", err)
+			}
+		})
+	}
+	set := &fvecs.Float{Dim: 1, Data: []float32{1, 2}}
+	for _, single := range []bool{false, true} {
+		p := DefaultParams()
+		p.M, p.SingleLayer = 1, single
+		if _, err := BuildHNSW(set, p); err == nil {
+			t.Fatalf("M=1 accepted with SingleLayer=%v", single)
+		}
+	}
+	p := Params{M: int(^uint(0) >> 1), EfConstruct: int(^uint(0) >> 1)}
+	if _, err := BuildHNSW(set, p); err == nil {
+		t.Fatal("overflowing default MMax0 accepted")
+	}
+	h, err := BuildHNSW(set, Params{M: 2, EfConstruct: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := h.Search([]float32{2}, 1)
+	if err != nil || len(got) != 1 || got[0].ID != 1 {
+		t.Fatalf("valid boundary input failed: %v, %v", got, err)
+	}
+}
+
 // One vector is a legitimate index: it's its own nearest neighbour and there is
 // nothing to walk to.
 func TestHNSWSingleVector(t *testing.T) {

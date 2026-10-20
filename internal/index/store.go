@@ -111,7 +111,22 @@ func (h *HNSW) Save(w io.Writer) error {
 	return bw.Flush()
 }
 
+// LoadOptions controls the read/memory tradeoff without changing the file format.
+type LoadOptions struct {
+	// SinglePass avoids rereading the graph even when the input is seekable.
+	// It uses temporary adjacency arrays before compaction, increasing peak
+	// memory but potentially reducing load time on slow storage.
+	SinglePass bool
+}
+
+// LoadHNSW uses two graph passes when seeking is available to reduce peak memory.
+// Non-seekable readers use a single pass followed by compaction.
 func LoadHNSW(r io.Reader) (*HNSW, error) {
+	return LoadHNSWWithOptions(r, LoadOptions{})
+}
+
+// LoadHNSWWithOptions loads the same format with an explicit read/memory policy.
+func LoadHNSWWithOptions(r io.Reader, opts LoadOptions) (*HNSW, error) {
 	br := bufio.NewReaderSize(r, 1<<20)
 
 	magic := make([]byte, len(storeMagic))
@@ -137,22 +152,53 @@ func LoadHNSW(r io.Reader) (*HNSW, error) {
 		return nil, err
 	}
 
-	dim, count := int(head[1]), int(head[2])
-	if dim < 1 || count < 1 {
-		return nil, fmt.Errorf("header says %d vectors of dimension %d", count, dim)
+	if head[1] == 0 || head[2] == 0 {
+		return nil, fmt.Errorf("header says %d vectors of dimension %d", head[2], head[1])
 	}
 	// A corrupt header could otherwise ask for a terabyte before anything else
 	// gets a chance to notice the file is wrong.
-	if int64(count)*int64(dim) > maxElements {
-		return nil, fmt.Errorf("header says %d x %d, which is past anything this reads", count, dim)
+	elements := uint64(head[1]) * uint64(head[2])
+	if elements > maxElements || elements > uint64(^uint(0)>>1)/4 || head[2] > math.MaxInt32 {
+		return nil, fmt.Errorf("header says %d x %d, which is past anything this reads", head[2], head[1])
 	}
+	dim, count := int(head[1]), int(head[2])
 	if head[3] < 2 {
 		return nil, fmt.Errorf("header says M is %d, must be at least 2", head[3])
+	}
+	if head[4] < head[3] || head[5] < head[3] || head[6] < head[3] {
+		return nil, fmt.Errorf("MMax, MMax0 and efConstruction must be at least M")
+	}
+	for _, v := range head[3:8] {
+		if uint64(v) > uint64(^uint(0)>>1) {
+			return nil, fmt.Errorf("index parameter %d exceeds platform limits", v)
+		}
+	}
+	// Validate unsigned IDs before conversion: 0xffffffff becomes int32(-1).
+	if head[9] >= head[2] {
+		return nil, fmt.Errorf("entry point is node %d, index holds %d nodes", head[9], count)
+	}
+	if head[8] >= 255 || (head[10]&flagSingleLayer != 0 && head[8] != 0) {
+		return nil, fmt.Errorf("invalid maximum level %d", head[8])
+	}
+	if head[10] & ^uint32(flagSingleLayer|flagNearestM) != 0 {
+		return nil, fmt.Errorf("unsupported index flags %d", head[10])
+	}
+
+	levels := make([]byte, count)
+	if _, err := io.ReadFull(br, levels); err != nil {
+		return nil, fmt.Errorf("reading level counts: %w", err)
+	}
+	for i, n := range levels {
+		if n == 0 || uint32(n) > head[8]+1 {
+			return nil, fmt.Errorf("node %d has invalid level count %d", i, n)
+		}
+	}
+	if uint32(levels[head[9]]) != head[8]+1 {
+		return nil, fmt.Errorf("entry node does not occupy maximum level %d", head[8])
 	}
 
 	h := &HNSW{
 		dim:         dim,
-		data:        make([]float32, count*dim),
 		links:       make([][][]int32, count),
 		m:           int(head[3]),
 		mMax:        int(head[4]),
@@ -169,17 +215,29 @@ func LoadHNSW(r io.Reader) (*HNSW, error) {
 	h.efSearch.Store(int64(head[7]))
 	h.pool = sync.Pool{New: func() any { return newWorkspace(count) }}
 
-	levels := make([]byte, count)
-	if _, err := io.ReadFull(br, levels); err != nil {
-		return nil, fmt.Errorf("reading level counts: %w", err)
+	// Seekable inputs permit an exact allocation without keeping a million
+	// temporary bottom-layer arrays. Account for bufio's read-ahead when
+	// recording the graph's position (the input may start at a nonzero offset).
+	if seeker, ok := r.(io.Seeker); ok && !opts.SinglePass {
+		position, err := seeker.Seek(0, io.SeekCurrent)
+		if err == nil {
+			graphStart := position - int64(br.Buffered())
+			offsets, err := h.scanBottomOffsets(newWordReader(br), levels)
+			if err != nil {
+				return nil, err
+			}
+			if _, err := seeker.Seek(graphStart, io.SeekStart); err != nil {
+				return nil, fmt.Errorf("rewinding graph: %w", err)
+			}
+			br.Reset(r)
+			h.bottomOffsets = offsets
+			h.bottom = make([]int32, offsets[count])
+		}
 	}
 
 	r32 := newWordReader(br)
 
 	for i, n := range levels {
-		if n == 0 {
-			return nil, fmt.Errorf("node %d occupies no levels", i)
-		}
 		h.links[i] = make([][]int32, n)
 
 		for lc := range h.links[i] {
@@ -187,18 +245,30 @@ func LoadHNSW(r io.Reader) (*HNSW, error) {
 			if err != nil {
 				return nil, fmt.Errorf("node %d level %d: %w", i, lc, err)
 			}
-			if int(size) > count {
-				return nil, fmt.Errorf("node %d level %d claims %d neighbours, index holds %d nodes", i, lc, size, count)
+			if size > head[2] || uint64(size) > uint64(h.capAt(lc)) {
+				return nil, fmt.Errorf("node %d level %d claims %d neighbours, index holds %d nodes and layer cap is %d", i, lc, size, count, h.capAt(lc))
 			}
 
-			nbs := make([]int32, size)
+			var nbs []int32
+			if lc == 0 && h.bottomOffsets != nil {
+				lo, hi := h.bottomOffsets[i], h.bottomOffsets[i+1]
+				if uint64(size) != uint64(hi-lo) {
+					return nil, fmt.Errorf("node %d neighbour count changed between graph passes", i)
+				}
+				nbs = h.bottom[lo:hi:hi]
+			} else {
+				nbs = make([]int32, size)
+			}
 			for j := range nbs {
 				id, err := r32.next()
 				if err != nil {
 					return nil, fmt.Errorf("node %d level %d: %w", i, lc, err)
 				}
-				if int(id) >= count {
+				if id >= head[2] {
 					return nil, fmt.Errorf("node %d has neighbour %d, index holds %d nodes", i, id, count)
+				}
+				if int(levels[id]) <= lc {
+					return nil, fmt.Errorf("node %d level %d links to node %d which does not occupy that level", i, lc, id)
 				}
 				nbs[j] = int32(id)
 			}
@@ -206,6 +276,8 @@ func LoadHNSW(r io.Reader) (*HNSW, error) {
 		}
 	}
 
+	// Allocate vector storage only after validating the graph.
+	h.data = make([]float32, int(elements))
 	for i := range h.data {
 		bits, err := r32.next()
 		if err != nil {
@@ -214,15 +286,46 @@ func LoadHNSW(r io.Reader) (*HNSW, error) {
 		h.data[i] = math.Float32frombits(bits)
 	}
 
-	if int(h.entry) >= count {
-		return nil, fmt.Errorf("entry point is node %d, index holds %d nodes", h.entry, count)
+	if h.bottomOffsets == nil {
+		h.compactBottom()
 	}
-	if h.maxLevel != len(h.links[h.entry])-1 {
-		return nil, fmt.Errorf("header says maxLevel %d, entry node occupies %d levels",
-			h.maxLevel, len(h.links[h.entry]))
-	}
-
 	return h, nil
+}
+
+// Validate all graph words before allocating packed storage. The second pass
+// validates again, including counts, so a changing input cannot overrun slices.
+func (h *HNSW) scanBottomOffsets(r *wordReader, levels []byte) ([]int, error) {
+	offsets := make([]int, len(levels)+1)
+	for i, n := range levels {
+		for lc := 0; lc < int(n); lc++ {
+			size, err := r.next()
+			if err != nil {
+				return nil, fmt.Errorf("node %d level %d: %w", i, lc, err)
+			}
+			if uint64(size) > uint64(len(levels)) || uint64(size) > uint64(h.capAt(lc)) {
+				return nil, fmt.Errorf("node %d level %d claims %d neighbours, exceeding node count or layer cap", i, lc, size)
+			}
+			if lc == 0 {
+				if uint64(offsets[i])+uint64(size) > uint64(^uint(0)>>1)/4 {
+					return nil, fmt.Errorf("bottom graph exceeds platform allocation limits")
+				}
+				offsets[i+1] = offsets[i] + int(size)
+			}
+			for j := uint32(0); j < size; j++ {
+				id, err := r.next()
+				if err != nil {
+					return nil, fmt.Errorf("node %d level %d: %w", i, lc, err)
+				}
+				if uint64(id) >= uint64(len(levels)) {
+					return nil, fmt.Errorf("node %d level %d has invalid neighbour %d", i, lc, id)
+				}
+				if int(levels[id]) <= lc {
+					return nil, fmt.Errorf("node %d level %d links to node %d which does not occupy that level", i, lc, id)
+				}
+			}
+		}
+	}
+	return offsets, nil
 }
 
 // wordWriter and wordReader move uint32s through a reusable buffer instead of
