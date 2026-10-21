@@ -12,6 +12,9 @@ package distance
 // package variable set once at startup, so it predicts perfectly and costs
 // nothing measurable next to the loop it guards.
 func L2Squared(a, b []float32) float32 {
+	if len(a) != len(b) {
+		panic("distance: vector dimensions differ")
+	}
 	if useAVX2 && len(a) >= 8 {
 		return l2SquaredAVX2(a, b)
 	}

@@ -13,7 +13,6 @@ import subprocess
 import time
 from pathlib import Path
 
-import hnswlib
 import numpy as np
 
 from benchmark_timing import measure_throughput
@@ -21,15 +20,34 @@ from benchmark_metadata import package_version
 
 
 def read_fvecs(path):
-    raw = np.fromfile(path, dtype=np.int32)
-    dim = raw[0]
-    return raw.reshape(-1, dim + 1)[:, 1:].view(np.float32)
+    values = read_ivecs(path).view("<f4")
+    if not np.isfinite(values).all():
+        raise ValueError(f"{path}: vectors contain non-finite values")
+    return values
 
 
 def read_ivecs(path):
-    raw = np.fromfile(path, dtype=np.int32)
-    dim = raw[0]
-    return raw.reshape(-1, dim + 1)[:, 1:]
+    if Path(path).stat().st_size % 4:
+        raise ValueError(f"{path}: truncated vecs word")
+    raw = np.fromfile(path, dtype="<i4")
+    if not raw.size:
+        raise ValueError(f"{path}: empty vecs file")
+    dim = int(raw[0])
+    if not 1 <= dim <= 65536 or raw.size % (dim + 1):
+        raise ValueError(f"{path}: invalid dimension or truncated record")
+    records = raw.reshape(-1, dim + 1)
+    if not np.all(records[:, 0] == dim):
+        raise ValueError(f"{path}: inconsistent record dimensions")
+    return records[:, 1:]
+
+
+def validate_inputs(base, queries, truth, k):
+    if base.shape[1] != queries.shape[1] or len(queries) != len(truth):
+        raise ValueError("base, query and ground-truth dimensions/counts disagree")
+    if not 1 <= k <= min(len(base), truth.shape[1], 500):
+        raise ValueError("k must fit the base, ground truth and ef sweep (1..500)")
+    if np.any(truth < 0) or np.any(truth >= len(base)):
+        raise ValueError("ground truth contains out-of-range vector IDs")
 
 
 def recall_at(base, queries, truth, found_ids, k):
@@ -70,6 +88,8 @@ def cpu_model():
 
 
 def main():
+    import hnswlib
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="/mnt/d/data/sift")
     ap.add_argument("--name", default="sift")
@@ -78,12 +98,17 @@ def main():
     ap.add_argument("--ef-construction", type=int, default=200)
     ap.add_argument("--out", default="bench/results")
     args = ap.parse_args()
+    if Path(args.name).name != args.name or args.name in ("", ".", ".."):
+        ap.error("--name must be a dataset filename prefix")
+    if args.M < 2 or args.ef_construction < args.M:
+        ap.error("--M must be at least 2 and --ef-construction must be at least M")
     started_utc = datetime.now(timezone.utc).isoformat()
 
     d = Path(args.data)
     base = read_fvecs(d / f"{args.name}_base.fvecs")
     queries = read_fvecs(d / f"{args.name}_query.fvecs")
     truth = read_ivecs(d / f"{args.name}_groundtruth.ivecs")
+    validate_inputs(base, queries, truth, args.k)
     n, dim = base.shape
     print(f"base {n} x {dim}, {len(queries)} queries")
 

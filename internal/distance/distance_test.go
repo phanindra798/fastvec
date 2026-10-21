@@ -1,10 +1,24 @@
 package distance
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
 )
+
+func TestL2SquaredRejectsMismatchedDimensions(t *testing.T) {
+	for _, sizes := range [][2]int{{8, 0}, {16, 8}, {1, 2}} {
+		t.Run(fmt.Sprint(sizes), func(t *testing.T) {
+			defer func() {
+				if recover() == nil {
+					t.Fatal("expected dimension mismatch panic before assembly dispatch")
+				}
+			}()
+			L2Squared(make([]float32, sizes[0]), make([]float32, sizes[1]))
+		})
+	}
+}
 
 // float64 references. Slow, but obviously right, so the float32 versions get
 // checked against these instead of against numbers I typed in myself.

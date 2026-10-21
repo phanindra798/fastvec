@@ -6,6 +6,10 @@ Implementing HNSW from the paper rather than calling a library, and benchmarking
 it against hnswlib on SIFT1M with everything running on a laptop CPU.
 A FAISS comparison is planned.
 
+The [security review](docs/security-review.md) records input checks, dependency
+audits and current limitations. Dataset and index loaders expect trusted local
+files.
+
 ## Results
 
 Five paired SIFT1M runs on 2026-10-19 using `search_only_repeated_sweeps_v2`.
@@ -64,6 +68,9 @@ Go standard library only, plus CPU feature detection written by hand rather than
 pulled from `golang.org/x/sys`.
 
 ## Running
+
+Use Go 1.26.9 or a newer supported patch release. The recorded benchmark
+environment below describes the earlier measurements, not the current minimum.
 
     make test          # unit tests
     make bench         # HNSW on SIFT1M, sweeps ef, writes JSON

@@ -77,7 +77,7 @@ func (f *Flat) SearchN(q []float32, k, workers int) ([]topk.Result, error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			c := topk.New(k)
+			c := topk.New(min(k, hi-lo))
 			f.scan(q, lo, hi, c)
 			partials[w] = c.Results()
 		}()

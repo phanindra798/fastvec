@@ -190,6 +190,7 @@ func (h *HNSW) compactBottom() {
 // under that lock rather than reading it live, since another worker may be
 // appending. Contention is low: a million nodes against a handful of workers.
 func (h *HNSW) buildParallel(n, workers int) {
+	workers = min(workers, n)
 	levels := make([]int, n)
 	for i := 1; i < n; i++ {
 		levels[i] = h.randomLevel()
@@ -309,7 +310,7 @@ func (h *HNSW) insertAt(id int32, level int) {
 
 		keep := h.selectNeighbours(id, found, h.m)
 
-		own := make([]int32, 0, h.m)
+		own := make([]int32, 0, len(keep))
 		for _, r := range keep {
 			own = append(own, r.ID)
 		}
@@ -358,8 +359,33 @@ func (h *HNSW) setOwn(id int32, level int, nbs []int32) {
 		return
 	}
 	h.locks[id].Lock()
+	defer h.locks[id].Unlock()
+	// A node can be discovered through an upper layer before it initializes
+	// this layer. Preserve reverse links other insertions have already added.
+	for _, existing := range h.links[id][level] {
+		found := false
+		for _, nb := range nbs {
+			if nb == existing {
+				found = true
+				break
+			}
+		}
+		if !found {
+			nbs = append(nbs, existing)
+		}
+	}
+	if len(nbs) > h.capAt(level) {
+		ranked := topk.New(len(nbs))
+		for _, nb := range nbs {
+			ranked.Add(nb, distance.L2Squared(h.vec(id), h.vec(nb)))
+		}
+		keep := h.selectNeighbours(id, ranked.Results(), h.capAt(level))
+		nbs = nbs[:0]
+		for _, nb := range keep {
+			nbs = append(nbs, nb.ID)
+		}
+	}
 	h.links[id][level] = nbs
-	h.locks[id].Unlock()
 }
 
 // neighbours hands back node id's list at this level.
@@ -441,7 +467,7 @@ func (h *HNSW) selectNeighbours(node int32, candidates []topk.Result, m int) []t
 		return candidates
 	}
 
-	kept := make([]topk.Result, 0, m)
+	kept := make([]topk.Result, 0, min(m, len(candidates)))
 	for _, c := range candidates {
 		if len(kept) >= m {
 			break
