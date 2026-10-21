@@ -94,6 +94,19 @@ mutate it concurrently with construction or search. No service-level request
 limits, authorization, encrypted transport or tenant isolation are implemented,
 because there is currently no service.
 
-Linux execution remains pending in GitHub CI: local WSL access is denied and
-Docker's Linux engine is unavailable. A successful local review and dependency
-scan do not establish that all bugs have been eliminated.
+GitHub CI has now passed the Linux and Windows test matrices, Linux race
+detection and Python tests. A successful review and dependency scan do not
+establish that all bugs have been eliminated.
+
+## GitHub CI follow-up — 2026-10-21
+
+[Run 39594983730](https://github.com/phanindra798/fastvec/actions/runs/39594983730)
+passed eight of nine jobs. The remaining Python audit reported eight
+vulnerabilities in Pillow 12.3.0, all listing 13.0.0 as the fixed version.
+This supersedes the earlier clean audit result for that old pin. The dependency
+is now pinned to Pillow 13.0.0, and a fresh local audit of the updated requirements
+reports no known vulnerabilities. The updated commit still needs a new CI run.
+
+The Go audit passed in that run with no reachable vulnerabilities; it reported
+one module-level advisory in unused code. Audit results reflect the database
+and platform at the time of each run, not a permanent security guarantee.
