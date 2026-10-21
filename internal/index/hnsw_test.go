@@ -29,12 +29,21 @@ func TestOversizedSearchWidthsUseBoundedWorkspace(t *testing.T) {
 	if err != nil || len(got) != 3 || got[0].ID != 2 {
 		t.Fatalf("got %v, %v", got, err)
 	}
-	w := h.pool.Get().(*workspace)
+	// sync.Pool may discard entries, particularly under the race detector.
+	// Inspect an explicitly owned workspace instead of assuming pool reuse.
+	w := newWorkspace(h.Len())
+	h.searchLayer([]float32{2}, h.entry, int(^uint(0)>>1), 0, -1, w)
 	if w.res.Cap() > h.Len() {
 		t.Fatalf("scratch capacity %d exceeds node count", w.res.Cap())
 	}
-	h.pool.Put(w)
 	// Also exercise an oversized persisted search width without huge datasets.
+	// Persisted settings must fit uint32; the runtime-only maximum above does
+	// not fit on 64-bit platforms and Save now rejects it explicitly.
+	p.EfConstruct = 1 << 30
+	h, err = BuildHNSW(set, p)
+	if err != nil {
+		t.Fatal(err)
+	}
 	h.SetEfSearch(1 << 30)
 	var saved bytes.Buffer
 	if err := h.Save(&saved); err != nil {

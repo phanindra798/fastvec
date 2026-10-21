@@ -36,6 +36,20 @@ const (
 )
 
 func (h *HNSW) Save(w io.Writer) error {
+	efSearch := h.EfSearch()
+	// Runtime tuning uses int, but the file format stores unsigned 32-bit
+	// values. Reject unrepresentable settings instead of silently wrapping.
+	for _, parameter := range []struct {
+		name  string
+		value int
+	}{
+		{"M", h.m}, {"MMax", h.mMax}, {"MMax0", h.mMax0},
+		{"efConstruction", h.efConstruct}, {"efSearch", efSearch},
+	} {
+		if parameter.value < 0 || uint64(parameter.value) > math.MaxUint32 {
+			return fmt.Errorf("%s (%d) cannot be represented in the index format", parameter.name, parameter.value)
+		}
+	}
 	bw := bufio.NewWriterSize(w, 1<<20)
 
 	if _, err := bw.WriteString(storeMagic); err != nil {
@@ -58,7 +72,7 @@ func (h *HNSW) Save(w io.Writer) error {
 		uint32(h.mMax),
 		uint32(h.mMax0),
 		uint32(h.efConstruct),
-		uint32(h.EfSearch()),
+		uint32(efSearch),
 		uint32(h.maxLevel),
 		uint32(h.entry),
 		flags,

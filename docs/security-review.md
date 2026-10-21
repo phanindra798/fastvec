@@ -6,6 +6,13 @@ network server or authentication layer.
 
 ## Corrections
 
+- Final race run exposed a test-only nil dereference: a workspace-allocation
+  test assumed `sync.Pool.Get` would reuse the last workspace. It now owns
+  its workspace explicitly, retaining the same allocation-bound assertion.
+- Final persistence check: reject negative or greater-than-uint32 tuning
+  parameters before writing index data. Previously these values could wrap
+  silently during serialization. Regression tests cover all five persisted
+  tuning fields and verify rejection leaves the output untouched.
 - Preserve reverse edges already added by another worker when initializing a
   node's own neighbour list during parallel construction. A quality check
   initially failed with 1.21% additional stranded nodes; inspection found the
@@ -68,6 +75,12 @@ secret.
 
 The smoke run is a correctness check, not a replacement performance
 measurement. These changes do not revise the historical throughput claims.
+
+The final save-format guard was checked with fresh default, purego and
+diagnostic short suites, vet and builds, plus the complete short race suite.
+The affected allocation/persistence tests passed 30 race-enabled repetitions.
+All 18 Python tests, artifact checks and `git fsck --no-reflogs` also passed.
+The full dataset run listed above predates this final persistence-only change.
 
 ## Trust boundary and remaining limits
 
