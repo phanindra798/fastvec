@@ -1,0 +1,6 @@
+goos: linux
+goarch: amd64
+pkg: github.com/phanindra798/fastvec/internal/index
+cpu: 12th Gen Intel(R) Core(TM) i7-12650H
+BenchmarkHNSWSearch/ef500         	   30000	    980017 ns/op	    4096 B/op	       1 allocs/op
+PASS

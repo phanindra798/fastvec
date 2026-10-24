@@ -1,0 +1,24 @@
+File: search-stability.test
+Build ID: 72d070cdb9e83d9cded597d8bc1e7bbd197f08f2
+Type: cpu
+Time: 2026-10-22 07:52:28 UTC
+Duration: 51.68s, Total samples = 49.34s (95.47%)
+Showing nodes accounting for 47.78s, 96.84% of 49.34s total
+Dropped 66 nodes (cum <= 0.25s)
+Showing top 15 nodes out of 28
+      flat  flat%   sum%        cum   cum%
+    31.48s 63.80% 63.80%     31.48s 63.80%  github.com/phanindra798/fastvec/internal/distance.l2SquaredAVX2
+     6.22s 12.61% 76.41%      6.22s 12.61%  github.com/phanindra798/fastvec/internal/index.(*workspace).seen (inline)
+     3.92s  7.94% 84.35%      3.92s  7.94%  github.com/phanindra798/fastvec/internal/index.(*HNSW).neighbours
+     1.36s  2.76% 87.11%      1.63s  3.30%  github.com/phanindra798/fastvec/internal/topk.(*Collector).down
+     1.08s  2.19% 89.30%      1.08s  2.19%  github.com/phanindra798/fastvec/internal/topk.Before (inline)
+     0.82s  1.66% 90.96%     47.91s 97.10%  github.com/phanindra798/fastvec/internal/index.(*HNSW).searchLayer
+     0.58s  1.18% 92.14%      0.75s  1.52%  github.com/phanindra798/fastvec/internal/index.(*candidates).pop
+     0.54s  1.09% 93.23%      0.68s  1.38%  github.com/phanindra798/fastvec/internal/index.(*candidates).push (inline)
+     0.34s  0.69% 93.92%      0.75s  1.52%  github.com/phanindra798/fastvec/internal/topk.(*Collector).Results.func1
+     0.32s  0.65% 94.57%     31.80s 64.45%  github.com/phanindra798/fastvec/internal/distance.L2Squared
+     0.29s  0.59% 95.16%      0.29s  0.59%  github.com/phanindra798/fastvec/internal/index.(*HNSW).vec (inline)
+     0.28s  0.57% 95.72%      0.84s  1.70%  slices.partitionCmpFunc[go.shape.struct { ID int32; Dist float32 }]
+     0.24s  0.49% 96.21%      0.74s  1.50%  github.com/phanindra798/fastvec/internal/index.LoadHNSWWithOptions
+     0.19s  0.39% 96.60%     32.28s 65.42%  github.com/phanindra798/fastvec/internal/index.(*HNSW).measure
+     0.12s  0.24% 96.84%      0.39s  0.79%  github.com/phanindra798/fastvec/internal/index.(*wordReader).next

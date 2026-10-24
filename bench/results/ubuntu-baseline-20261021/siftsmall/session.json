@@ -1,0 +1,127 @@
+{
+  "started_utc": "2026-10-21T12:58:36.173495+00:00",
+  "status": "complete",
+  "runs": 4,
+  "commands": [
+    {
+      "run": 1,
+      "implementation": "fastvec",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/fastvec-bench-ubuntu",
+        "-data",
+        "/mnt/d/data/siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-01",
+        "-index-load-policy",
+        "auto"
+      ]
+    },
+    {
+      "run": 1,
+      "implementation": "hnswlib",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/py/.venv/bin/python",
+        "-u",
+        "/home/phanindra_contributions/dev/fastvec/py/bench_baselines.py",
+        "--data",
+        "/mnt/d/data/siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-01"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "hnswlib",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/py/.venv/bin/python",
+        "-u",
+        "/home/phanindra_contributions/dev/fastvec/py/bench_baselines.py",
+        "--data",
+        "/mnt/d/data/siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-02"
+      ]
+    },
+    {
+      "run": 2,
+      "implementation": "fastvec",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/fastvec-bench-ubuntu",
+        "-data",
+        "/mnt/d/data/siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-02",
+        "-index-load-policy",
+        "auto"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "fastvec",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/fastvec-bench-ubuntu",
+        "-data",
+        "/mnt/d/data/siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-03",
+        "-index-load-policy",
+        "auto"
+      ]
+    },
+    {
+      "run": 3,
+      "implementation": "hnswlib",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/py/.venv/bin/python",
+        "-u",
+        "/home/phanindra_contributions/dev/fastvec/py/bench_baselines.py",
+        "--data",
+        "/mnt/d/data/siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-03"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "hnswlib",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/py/.venv/bin/python",
+        "-u",
+        "/home/phanindra_contributions/dev/fastvec/py/bench_baselines.py",
+        "--data",
+        "/mnt/d/data/siftsmall",
+        "--name",
+        "siftsmall",
+        "--out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-04"
+      ]
+    },
+    {
+      "run": 4,
+      "implementation": "fastvec",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/fastvec-bench-ubuntu",
+        "-data",
+        "/mnt/d/data/siftsmall",
+        "-name",
+        "siftsmall",
+        "-out",
+        "/home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-04",
+        "-index-load-policy",
+        "auto"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,404 @@
+{
+  "started_utc": "2026-10-22T07:45:42.526301+00:00",
+  "status": "complete",
+  "binary_sha256": "ffd698d59a94a0251bbd6b4b5602b5c44c4b629306dbcdbfcd5ead23d3292717",
+  "source_commit": "f7d70d0f38353fbbe321d0a3efd54ab668aabdb5",
+  "source_matches_baseline": true,
+  "allowed_vcpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "pinned_vcpu": 0,
+  "environment": {
+    "FASTVEC_BENCH_INDEX": "/mnt/d/data/sift.fvi",
+    "FASTVEC_BENCH_QUERIES": "/mnt/d/data/sift/sift_query.fvecs",
+    "GOMAXPROCS": "1"
+  },
+  "runs": [
+    {
+      "pair": 1,
+      "condition": "normal",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:45:42.529463+00:00",
+        "loadavg": "0.14 0.25 0.90 1/276 9663",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.84,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":9,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:46:23.859034+00:00",
+        "loadavg": "0.56 0.34 0.91 1/271 9675",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.84,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":4,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 223952.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 921546.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "condition": "pinned",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:46:25.314361+00:00",
+        "loadavg": "0.56 0.34 0.91 3/275 9680",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.84,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":28,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:47:05.916739+00:00",
+        "loadavg": "0.92 0.47 0.93 1/271 9692",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.84,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":0,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 222172.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 955076.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "condition": "pinned",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:47:07.414528+00:00",
+        "loadavg": "0.92 0.47 0.93 1/276 9698",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.84,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":5,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:47:47.622871+00:00",
+        "loadavg": "1.07 0.56 0.94 2/271 9800",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.85,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":6,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 219472.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 997324.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "condition": "normal",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:47:49.124248+00:00",
+        "loadavg": "1.06 0.56 0.94 2/275 9805",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.85,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":25,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:48:33.093244+00:00",
+        "loadavg": "1.61 0.77 0.99 2/270 11249",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.85,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":null,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 237748.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 1069660.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "condition": "normal",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:48:34.626802+00:00",
+        "loadavg": "1.56 0.78 1.00 7/275 11360",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.85,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":20,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:49:20.573710+00:00",
+        "loadavg": "1.94 0.98 1.05 2/271 21391",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":11,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 249852.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 1110613.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "condition": "pinned",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:49:22.122953+00:00",
+        "loadavg": "1.94 0.98 1.05 3/288 21519",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":25,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:50:03.213606+00:00",
+        "loadavg": "1.48 0.99 1.05 1/276 21707",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":0,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 225341.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 960904.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "condition": "pinned",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:50:04.679785+00:00",
+        "loadavg": "1.36 0.97 1.04 2/280 21712",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":3,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:50:45.423656+00:00",
+        "loadavg": "1.18 0.97 1.04 1/273 21722",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":0,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 236436.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 986361.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "condition": "normal",
+      "argv": [
+        "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "utc": "2026-10-22T07:50:46.896572+00:00",
+        "loadavg": "1.18 0.97 1.04 4/277 21728",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.86,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":13,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "returncode": 0,
+      "after": {
+        "utc": "2026-10-22T07:51:29.904345+00:00",
+        "loadavg": "1.08 0.98 1.04 1/273 21744",
+        "host": {
+          "returncode": 0,
+          "stdout": "{\"AC\":\"Online\",\"BatteryFraction\":0.87,\"PowerPlan\":\"Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)\",\"CPU\":{\"Name\":\"12th Gen Intel(R) Core(TM) i7-12650H\",\"LoadPercentage\":6,\"CurrentClockSpeed\":2300,\"MaxClockSpeed\":2300}}",
+          "stderr": ""
+        }
+      },
+      "metrics": {
+        "100": {
+          "ns_per_query": 246493.0,
+          "bytes_per_query": 896.0,
+          "allocs_per_query": 1.0
+        },
+        "500": {
+          "ns_per_query": 958001.0,
+          "bytes_per_query": 4096.0,
+          "allocs_per_query": 1.0
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "WSL affinity selects a virtual CPU, not a guaranteed physical core.",
+    "Host power plan is observed, not changed; thermal state is not measured.",
+    "This Go search microbenchmark is not the earlier CLI/hnswlib comparison."
+  ],
+  "source_unchanged": true,
+  "finished_utc": "2026-10-22T07:51:31.427529+00:00"
+}

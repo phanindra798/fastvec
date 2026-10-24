@@ -41,6 +41,10 @@ the [SIFT1M session](bench/results/repeated-sift-20261019/summary.md).
 The [five-pair SIFT-small report](bench/results/repeated-siftsmall-20261019/summary.md)
 and [methodology](docs/benchmarks.md) provide additional context.
 
+A [current-code Ubuntu/WSL2 session](docs/ubuntu-baseline-20261021.md) records
+four pairs on 2026-10-21. SIFT1M throughput drifted substantially during that
+session; it is exploratory and kept separate from the Windows results above.
+
 ## What is implemented here
 
 [Search profiling](docs/search-profiling.md) records the measured CPU costs and

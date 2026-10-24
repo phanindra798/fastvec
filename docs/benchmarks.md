@@ -1,5 +1,12 @@
 # Benchmarks
 
+## Current Ubuntu session
+
+The [2026-10-21 Ubuntu/WSL2 report](ubuntu-baseline-20261021.md) measures the
+current code with four alternating pairs per dataset. It retains all raw runs
+and hashes, and documents substantial SIFT1M throughput drift. Treat it as an
+exploratory session, separate from the historical native Windows comparison.
+
 ## Repeated measurements
 
 Use `py/repeat_benchmarks.py` to collect separate process runs, alternating

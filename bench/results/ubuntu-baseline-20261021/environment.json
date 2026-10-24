@@ -1,0 +1,116 @@
+{
+  "captured_utc": "2026-10-21T12:58:25.030464+00:00",
+  "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "cpu": "12th Gen Intel(R) Core(TM) i7-12650H",
+  "logical_cpus": 16,
+  "python": "3.12.3",
+  "go": "go version go1.26.9 linux/amd64",
+  "commit": "f7d70d0f38353fbbe321d0a3efd54ab668aabdb5",
+  "initial_git_status": "",
+  "packages": {
+    "numpy": "2.5.2",
+    "hnswlib": "0.8.0",
+    "matplotlib": "3.11.1"
+  },
+  "source_sha256": {
+    "cmd/fastvec-bench/main.go": "3ac758c76590efdc96fa14d13d413943ea68c6236b58200025b8f892d627d32b",
+    "cmd/fastvec-bench/main_test.go": "a4cf362814cba8a02546c5963584521410a2c81c54dea648308ed3ea42a7db7e",
+    "cmd/fastvec-bench/timing.go": "73d1801c1e8c2dbab8b1600e7e99d5f317676cb33a75c574c91df5bebf9a3a90",
+    "cmd/fastvec-bench/timing_test.go": "b5b8d735773e5d054f14e9bcc092e172088c489f61ad1dcf64800b9d270a4995",
+    "cmd/fastvec-subset/main.go": "5441e3463559fb0d9ca58aaf88afbc1ae51f48e04ea6820596aafcc60963cd2d",
+    "cmd/fastvec-subset/main_test.go": "99d31c31a8136be813af95667b378bb57394ddb07bfbbe433ffbace1c0215fd4",
+    "go.mod": "684b311b5baa9334040f7bdb5d218baec61b5a7704465b65eb6bcb3852e38672",
+    "internal/benchenv/benchenv.go": "e7942754f3ac84e4ac534f2791f195215b1df3d025197724bc3efea2c729df09",
+    "internal/distance/avx2_test.go": "5d239ff16c79128a61cb4b283f6c4e7fe81d398bbffe69ef129487f3c3fb7ff7",
+    "internal/distance/cpu_amd64.go": "5f4dc394be4e17575f808358398720ade573599de260d4960a7a6860c2604cfb",
+    "internal/distance/cpu_amd64.s": "6b6f03fe8f55037434a5fac8eb3474cec6057d3db9f3b955a6ac8d767d510a80",
+    "internal/distance/cpu_noasm.go": "6123a375f459a378fad2d86bf4ab77f1f019ba012bf9320f54888774c5614eef",
+    "internal/distance/distance.go": "2ca46368a43433ff63fe88ede53ba50a62509c3724ab1755c775206e1b316b8f",
+    "internal/distance/distance_test.go": "14f2a09551168e843a5c60d5f5124b5b7992fbb7cc30f95ff2c17705da2fb764",
+    "internal/distance/l2_amd64.go": "5c762b57f4d44fc6e407662d4e1a4c94a49870265bee4addf6dcd6ed904f28d8",
+    "internal/distance/l2_amd64.s": "02b1b88a073acf400b39c1f7fa5f1ad3ec48311494646b684565a4b30d305f42",
+    "internal/fvecs/fvecs.go": "8f73804f46554262e917c1460704979d87c7be2aa5bd12a5a18bbecf7be9219d",
+    "internal/fvecs/fvecs_test.go": "12dc00a75969878621869e31474bdb01aabb3b06bab91b28aa799da2963ecc4b",
+    "internal/index/candidates.go": "4838dc293469377266746ea83ba3d349af0df3e0ef9bf9027c902a0c95aaba28",
+    "internal/index/compact_test.go": "64536bd62ec218a0c8565080134a7ad140d6936fbb44bcdc001cc399f14a03f2",
+    "internal/index/compatibility.go": "02ef83f8144126bd83830530a07ecd9d4a7bde7a457925ea2a469f6bc9cf4832",
+    "internal/index/counter_default.go": "5153ead780cb9faed6947754a0f2f63f56328530791af15a64819eaea0a7a5dc",
+    "internal/index/counter_diagnostic.go": "25f0dc704f7b19fe184effff5c5b7a588261525b19e5a1f83e0243097bb5dc62",
+    "internal/index/diag_test.go": "dfd4090d9c980dd60d3ce166dd292d2fa5fabed485343548283f48ece8f7063e",
+    "internal/index/flat.go": "143569bdc5c8777388cb56f11235515b2f45d2d6300b467ae7eb15e021318c3c",
+    "internal/index/flat_test.go": "1324f30727524557e9879ea780699831e57cede843b20c3ad2d523f895d6e959",
+    "internal/index/gate_test.go": "116b80f05d6681e0ed2f9c130c8852371ee28c96248136bc65efa1f17a770d9f",
+    "internal/index/groundtruth_test.go": "f19aeedbdb5fb7ea6ad23bf6e36b0d8ba39e0e322cefffeb032f07987811ecc2",
+    "internal/index/helpers_test.go": "243d3d26e31e2dcd98ecd62ced69865de6212fa5151fbf5cd938eb9ab336e97c",
+    "internal/index/heuristic_test.go": "0a57a3822fd4bb603eb2b1667da5da70af98decd388aab8098da07e7020abf8a",
+    "internal/index/hnsw.go": "30c0cc88d1bae3f34e2e7dab8d1812be88213db992681317a985a9f7311e2d15",
+    "internal/index/hnsw_test.go": "cfc0f5a87deb4a6b34315d083c23348f77713f2e0a39c5c34ab170cebddfaed7",
+    "internal/index/index.go": "aabe9818762956263bc7941dbd509886640c96906fbb643d6a73e6fd224998a9",
+    "internal/index/layers_test.go": "afe21b616ee94b63cd56e0efcff24be4cf88bcf98f0f00ccf2f406705d7eeadf",
+    "internal/index/load_bench_test.go": "c9dc2be24e33b9fe6bba8366cf9ff85e48f4e6d7918340fa02ee747b4f1f88d5",
+    "internal/index/load_slow_test.go": "00c0e4b4d78b0f4b990555459b31b25949943f85d14a055a2c070e5206b53c39",
+    "internal/index/parallel_build_test.go": "6a6be992fd38826ea492060dfbc4db3aa2202c87ae5defd8139f9fec2c2ae431",
+    "internal/index/parallel_recall_test.go": "0d1290e1fda03e398b028a317880c4f580bdbfec4e9a3bd6e8046ce5da932996",
+    "internal/index/parallel_test.go": "605d1eafbab4f9094120f72c6a3799632b07deb6dfcf2bb4a84eefd1f6e862db",
+    "internal/index/search_bench_test.go": "68d5d9f10e8e43eeaeb4995ddeb5b84c8c05587a561f265a857661bae5acc8d7",
+    "internal/index/store.go": "0bb0d9f40e671fbdcff0901a6588fd8416e8713056ace84407bef446ec119280",
+    "internal/index/store_parameters_test.go": "0afae4153cba6c93a4064a824471023907fb36e21f822ac0b83774e54f6d4cba",
+    "internal/index/store_seek_test.go": "4fdfd35fbed0a58e9c29dcde36ee702b81e700d377b3a7aad141cf5e642dedcf",
+    "internal/index/store_test.go": "1992cbf1c7d2b9775251dd58fad9857ed9f6b33daa518047594b05b5f436d671",
+    "internal/index/synthetic_recall_test.go": "94c5dc16144124ffc94d610b346d6e4ef118b2a3f003b76c78dbe4e9fd71ad2e",
+    "internal/index/worker_limits_test.go": "e7522ecd337a1af71e523179ce9aaa5dacdbbec9e3631b1931c35f825fd793a0",
+    "internal/index/workspace.go": "5453c90d83f15c5749939b15489f4d2bceab78bce2afe8b5ef804dee5d44bb29",
+    "internal/topk/topk.go": "98c79f6866ce01c555e194afd646a21544280641fad99d74949b29d3a5e6d6c5",
+    "internal/topk/topk_test.go": "b71e6533b7575ad395d57daf7754a3975490f38ae35dd712947e34c0067d5d7b",
+    "py/bench_baselines.py": "ff9eba535cbf2f8b25e94cc3ef648c5ce4c9e57430dfc3fa743d7fe4338587f9",
+    "py/benchmark_metadata.py": "14d3b33b3dae23604ce97871ed148a9b5e505400132aa4c1c70ae2bed5dc3315",
+    "py/benchmark_timing.py": "e2a52fd7930a92ed99bf02220610ac912308e9d31b969c50b2addc30e7d6a7d4",
+    "py/measure_load_windows.py": "7ba799b1489101c92a9c3f770f00cb2cb677d89e2c376a043586cac48c23d704",
+    "py/plots.py": "d140d12db5f5f29f1a9f4a42530e109afef44122a8c3cde43ecc297888c6e4be",
+    "py/repeat_benchmarks.py": "528cdec813e706443627b96c33e6ef1150b8defc02b7ff1b588a237b19650161",
+    "py/test_baseline_inputs.py": "fcb268d529affea802943e691d46151564da5e9ebc4b911f6fcdfb6794714ce1",
+    "py/test_benchmark_metadata.py": "63157f9584144f1b3ce97c4583d938f9346ee590a84127103d1d436dc8715bf0",
+    "py/test_benchmark_timing.py": "e641d2cb995c2a630a813066672fe91a25683f27d8cc999a14b3cc0bae1abdd9",
+    "py/test_repeat_benchmarks.py": "8fe4b8b5970302a47e6fee5905a27c155263517b503c74b8f22f8499b63a6b2d"
+  },
+  "binary_sha256": "61a06165f4ce05321b525391f90beadfa4f83ce2fcabec2e4205ff124674e35c",
+  "input_files": {
+    "/mnt/d/data/sift.fvi": {
+      "bytes": 605346620,
+      "sha256": "d6ed32e8b68b2c910a9c5b64d04629cb374d2905b207d43f99f6903ea9547979"
+    },
+    "/mnt/d/data/siftsmall/siftsmall_base.fvecs": {
+      "bytes": 5160000,
+      "sha256": "1e90414a3254361aba48a0d58e461f7661fb135dabb3da985290e94de8f60fe0"
+    },
+    "/mnt/d/data/siftsmall/siftsmall_query.fvecs": {
+      "bytes": 51600,
+      "sha256": "095af38bda2741be721447ba97e9286fa918ece946be92a9ae133276eddc1a10"
+    },
+    "/mnt/d/data/siftsmall/siftsmall_groundtruth.ivecs": {
+      "bytes": 40400,
+      "sha256": "b0717bf276111a166f14dcc2653fd04465b2afd6d34c72be641b622cf99f95ae"
+    },
+    "/mnt/d/data/sift/sift_base.fvecs": {
+      "bytes": 516000000,
+      "sha256": "21f66e2975057b5728ba56de1c825bac4f4d89d596609ae985741c6242631816"
+    },
+    "/mnt/d/data/sift/sift_query.fvecs": {
+      "bytes": 5160000,
+      "sha256": "f7fc9be140accdfd64116c2fa2365ecdb69b8f084970c6b0532db5ff79ac8fdc"
+    },
+    "/mnt/d/data/sift/sift_groundtruth.ivecs": {
+      "bytes": 4040000,
+      "sha256": "2b71de0a8d5a83e6a84eec3e23fb8b611d8801dd9b3a6cd62f070ab65ea65f4f"
+    }
+  },
+  "method": "Four pairs per dataset, alternating order; single query thread; existing SIFT1M Fastvec cache; fresh hnswlib build each run.",
+  "limitations": [
+    "Windows host idleness, power and thermal state were not controlled.",
+    "SIFT1M cache build-worker count and original source revision are unknown.",
+    "Results measure current search code on the existing cache, not a fresh SIFT1M graph build.",
+    "QPS excludes construction and loading. No build-time comparison is claimed."
+  ],
+  "finished_utc": "2026-10-21T15:13:07.603701+00:00",
+  "source_unchanged": true
+}

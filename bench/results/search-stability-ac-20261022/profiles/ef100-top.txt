@@ -1,0 +1,24 @@
+File: search-stability.test
+Build ID: 72d070cdb9e83d9cded597d8bc1e7bbd197f08f2
+Type: cpu
+Time: 2026-10-22 07:51:53 UTC
+Duration: 30.84s, Total samples = 28.59s (92.69%)
+Showing nodes accounting for 27.56s, 96.40% of 28.59s total
+Dropped 62 nodes (cum <= 0.14s)
+Showing top 15 nodes out of 39
+      flat  flat%   sum%        cum   cum%
+    18.02s 63.03% 63.03%     18.02s 63.03%  github.com/phanindra798/fastvec/internal/distance.l2SquaredAVX2
+     3.51s 12.28% 75.31%      3.51s 12.28%  github.com/phanindra798/fastvec/internal/index.(*workspace).seen (inline)
+     2.15s  7.52% 82.83%      2.15s  7.52%  github.com/phanindra798/fastvec/internal/index.(*HNSW).neighbours
+     0.83s  2.90% 85.73%      1.02s  3.57%  github.com/phanindra798/fastvec/internal/topk.(*Collector).down
+     0.44s  1.54% 87.27%     26.41s 92.37%  github.com/phanindra798/fastvec/internal/index.(*HNSW).searchLayer
+     0.44s  1.54% 88.81%      0.44s  1.54%  github.com/phanindra798/fastvec/internal/topk.Before (inline)
+     0.39s  1.36% 90.17%      0.46s  1.61%  github.com/phanindra798/fastvec/internal/index.(*candidates).push (inline)
+     0.32s  1.12% 91.29%     18.34s 64.15%  github.com/phanindra798/fastvec/internal/distance.L2Squared
+     0.27s  0.94% 92.24%      0.67s  2.34%  github.com/phanindra798/fastvec/internal/index.LoadHNSWWithOptions
+     0.21s  0.73% 92.97%      0.24s  0.84%  github.com/phanindra798/fastvec/internal/index.(*candidates).pop
+     0.21s  0.73% 93.70%      0.21s  0.73%  internal/runtime/syscall/linux.Syscall6
+     0.21s  0.73% 94.44%      0.21s  0.73%  runtime.memmove
+     0.20s   0.7% 95.14%      0.37s  1.29%  slices.partitionCmpFunc[go.shape.struct { ID int32; Dist float32 }]
+     0.18s  0.63% 95.77%      1.36s  4.76%  github.com/phanindra798/fastvec/internal/index.(*HNSW).descend
+     0.18s  0.63% 96.40%     18.61s 65.09%  github.com/phanindra798/fastvec/internal/index.(*HNSW).measure

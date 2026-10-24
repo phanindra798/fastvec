@@ -1,0 +1,236 @@
+Run 1/4: fastvec
+base 10000 x 128, 100 queries
+built in 1.452s, levels [10000 659 40 2], degree min=2 max=32 mean=16.6
+level 0 reachable sets: 1, largest 10000 of 10000
+  ef=10   recall@10=0.9400   90151.2 QPS  p50 0.010  p99 0.117 ms
+  ef=20   recall@10=0.9800   51242.0 QPS  p50 0.019  p99 0.040 ms
+  ef=40   recall@10=0.9960   28348.2 QPS  p50 0.033  p99 0.063 ms
+  ef=60   recall@10=0.9970   20075.4 QPS  p50 0.048  p99 0.074 ms
+  ef=80   recall@10=0.9980   14692.7 QPS  p50 0.063  p99 0.198 ms
+  ef=100  recall@10=0.9980   13142.7 QPS  p50 0.076  p99 0.221 ms
+  ef=150  recall@10=1.0000    8801.2 QPS  p50 0.107  p99 0.197 ms
+  ef=200  recall@10=1.0000    7080.3 QPS  p50 0.140  p99 0.355 ms
+  ef=300  recall@10=1.0000    4953.1 QPS  p50 0.203  p99 0.463 ms
+  ef=500  recall@10=1.0000    3177.6 QPS  p50 0.314  p99 0.547 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-01/fastvec-siftsmall.json
+Run 1/4: hnswlib
+base 10000 x 128, 100 queries
+built in 0.3s
+  ef=10   recall@10=0.9370  102172.9 QPS  0.010 ms
+  ef=20   recall@10=0.9810   61209.0 QPS  0.016 ms
+  ef=40   recall@10=0.9960   32946.1 QPS  0.030 ms
+  ef=60   recall@10=0.9970   22072.5 QPS  0.045 ms
+  ef=80   recall@10=0.9980   18328.6 QPS  0.055 ms
+  ef=100  recall@10=0.9980   15209.2 QPS  0.066 ms
+  ef=150  recall@10=1.0000   11194.6 QPS  0.089 ms
+  ef=200  recall@10=1.0000    7992.9 QPS  0.125 ms
+  ef=300  recall@10=1.0000    5869.6 QPS  0.170 ms
+  ef=500  recall@10=1.0000    3902.2 QPS  0.256 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-01/hnswlib-siftsmall.json
+Run 2/4: hnswlib
+base 10000 x 128, 100 queries
+built in 0.3s
+  ef=10   recall@10=0.9290  110809.1 QPS  0.009 ms
+  ef=20   recall@10=0.9780   62573.4 QPS  0.016 ms
+  ef=40   recall@10=0.9950   34826.2 QPS  0.029 ms
+  ef=60   recall@10=0.9970   22470.6 QPS  0.045 ms
+  ef=80   recall@10=0.9980   18009.4 QPS  0.056 ms
+  ef=100  recall@10=0.9980   15545.3 QPS  0.064 ms
+  ef=150  recall@10=1.0000   10593.8 QPS  0.094 ms
+  ef=200  recall@10=1.0000    7880.1 QPS  0.127 ms
+  ef=300  recall@10=1.0000    5932.0 QPS  0.169 ms
+  ef=500  recall@10=1.0000    3912.9 QPS  0.256 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-02/hnswlib-siftsmall.json
+Run 2/4: fastvec
+base 10000 x 128, 100 queries
+built in 1.434s, levels [10000 659 40 2], degree min=2 max=32 mean=16.6
+level 0 reachable sets: 1, largest 10000 of 10000
+  ef=10   recall@10=0.9400   90531.1 QPS  p50 0.010  p99 0.016 ms
+  ef=20   recall@10=0.9800   53134.9 QPS  p50 0.018  p99 0.039 ms
+  ef=40   recall@10=0.9960   23802.2 QPS  p50 0.035  p99 0.089 ms
+  ef=60   recall@10=0.9970   18544.1 QPS  p50 0.053  p99 0.151 ms
+  ef=80   recall@10=0.9980   13548.0 QPS  p50 0.066  p99 0.133 ms
+  ef=100  recall@10=0.9980   11720.4 QPS  p50 0.078  p99 0.119 ms
+  ef=150  recall@10=1.0000    7712.3 QPS  p50 0.113  p99 0.251 ms
+  ef=200  recall@10=1.0000    6510.2 QPS  p50 0.143  p99 0.922 ms
+  ef=300  recall@10=1.0000    4589.5 QPS  p50 0.201  p99 0.432 ms
+  ef=500  recall@10=1.0000    3032.2 QPS  p50 0.320  p99 0.755 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-02/fastvec-siftsmall.json
+Run 3/4: fastvec
+base 10000 x 128, 100 queries
+built in 1.452s, levels [10000 659 40 2], degree min=2 max=32 mean=16.6
+level 0 reachable sets: 1, largest 10000 of 10000
+  ef=10   recall@10=0.9400   85836.7 QPS  p50 0.010  p99 0.061 ms
+  ef=20   recall@10=0.9800   51804.9 QPS  p50 0.019  p99 0.329 ms
+  ef=40   recall@10=0.9960   28632.4 QPS  p50 0.042  p99 0.123 ms
+  ef=60   recall@10=0.9970   19198.8 QPS  p50 0.055  p99 0.267 ms
+  ef=80   recall@10=0.9980   14690.4 QPS  p50 0.062  p99 0.131 ms
+  ef=100  recall@10=0.9980   11754.1 QPS  p50 0.081  p99 1.145 ms
+  ef=150  recall@10=1.0000    8800.7 QPS  p50 0.108  p99 0.241 ms
+  ef=200  recall@10=1.0000    6801.5 QPS  p50 0.139  p99 0.194 ms
+  ef=300  recall@10=1.0000    4894.6 QPS  p50 0.199  p99 0.292 ms
+  ef=500  recall@10=1.0000    3061.0 QPS  p50 0.333  p99 0.665 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-03/fastvec-siftsmall.json
+Run 3/4: hnswlib
+base 10000 x 128, 100 queries
+built in 0.2s
+  ef=10   recall@10=0.9350  100050.2 QPS  0.010 ms
+  ef=20   recall@10=0.9840   62065.8 QPS  0.016 ms
+  ef=40   recall@10=0.9960   31849.5 QPS  0.031 ms
+  ef=60   recall@10=0.9970   23843.4 QPS  0.042 ms
+  ef=80   recall@10=0.9980   18035.9 QPS  0.055 ms
+  ef=100  recall@10=0.9980   15069.6 QPS  0.066 ms
+  ef=150  recall@10=1.0000    9877.1 QPS  0.101 ms
+  ef=200  recall@10=1.0000    8227.0 QPS  0.122 ms
+  ef=300  recall@10=1.0000    5734.5 QPS  0.174 ms
+  ef=500  recall@10=1.0000    3830.5 QPS  0.261 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-03/hnswlib-siftsmall.json
+Run 4/4: hnswlib
+base 10000 x 128, 100 queries
+built in 0.3s
+  ef=10   recall@10=0.9250  104118.1 QPS  0.010 ms
+  ef=20   recall@10=0.9790   58864.7 QPS  0.017 ms
+  ef=40   recall@10=0.9950   31141.8 QPS  0.032 ms
+  ef=60   recall@10=0.9970   23656.9 QPS  0.042 ms
+  ef=80   recall@10=0.9980   17475.0 QPS  0.057 ms
+  ef=100  recall@10=0.9980   14506.0 QPS  0.069 ms
+  ef=150  recall@10=1.0000   10704.8 QPS  0.093 ms
+  ef=200  recall@10=1.0000    7793.8 QPS  0.128 ms
+  ef=300  recall@10=1.0000    5817.6 QPS  0.172 ms
+  ef=500  recall@10=1.0000    3785.1 QPS  0.264 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-04/hnswlib-siftsmall.json
+Run 4/4: fastvec
+base 10000 x 128, 100 queries
+built in 1.459s, levels [10000 659 40 2], degree min=2 max=32 mean=16.6
+level 0 reachable sets: 1, largest 10000 of 10000
+  ef=10   recall@10=0.9400   93107.7 QPS  p50 0.010  p99 0.015 ms
+  ef=20   recall@10=0.9800   51997.3 QPS  p50 0.018  p99 0.111 ms
+  ef=40   recall@10=0.9960   26878.4 QPS  p50 0.034  p99 0.055 ms
+  ef=60   recall@10=0.9970   20000.9 QPS  p50 0.050  p99 0.098 ms
+  ef=80   recall@10=0.9980   14364.7 QPS  p50 0.063  p99 0.135 ms
+  ef=100  recall@10=0.9980   12773.9 QPS  p50 0.077  p99 0.126 ms
+  ef=150  recall@10=1.0000    8884.0 QPS  p50 0.111  p99 0.195 ms
+  ef=200  recall@10=1.0000    6826.3 QPS  p50 0.145  p99 0.434 ms
+  ef=300  recall@10=1.0000    4832.8 QPS  p50 0.216  p99 0.349 ms
+  ef=500  recall@10=1.0000    3038.1 QPS  p50 0.329  p99 0.507 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/siftsmall/run-04/fastvec-siftsmall.json
+Run 1/4: fastvec
+base 1000000 x 128, 10000 queries
+loaded index from /mnt/d/data/sift.fvi in 5.578s
+loaded from disk, levels [1000000 62356 3994 246 26 2], degree min=1 max=32 mean=21.1
+level 0 reachable sets: 1, largest 1000000 of 1000000
+  ef=10   recall@10=0.7099   15629.0 QPS  p50 0.058  p99 0.157 ms
+  ef=20   recall@10=0.8395   10611.0 QPS  p50 0.087  p99 0.196 ms
+  ef=40   recall@10=0.9275    6334.4 QPS  p50 0.155  p99 0.312 ms
+  ef=60   recall@10=0.9599    4544.0 QPS  p50 0.216  p99 0.382 ms
+  ef=80   recall@10=0.9754    3531.8 QPS  p50 0.279  p99 0.477 ms
+  ef=100  recall@10=0.9835    2936.3 QPS  p50 0.342  p99 0.563 ms
+  ef=150  recall@10=0.9929    2013.0 QPS  p50 0.499  p99 0.798 ms
+  ef=200  recall@10=0.9963    1523.9 QPS  p50 0.649  p99 1.037 ms
+  ef=300  recall@10=0.9987    1058.3 QPS  p50 0.951  p99 1.529 ms
+  ef=500  recall@10=0.9997     673.1 QPS  p50 1.497  p99 2.403 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-01/fastvec-sift.json
+Run 1/4: hnswlib
+base 1000000 x 128, 10000 queries
+built in 87.9s
+  ef=10   recall@10=0.7072   19036.3 QPS  0.053 ms
+  ef=20   recall@10=0.8389   12254.1 QPS  0.082 ms
+  ef=40   recall@10=0.9270    7929.9 QPS  0.126 ms
+  ef=60   recall@10=0.9596    6004.9 QPS  0.167 ms
+  ef=80   recall@10=0.9751    4715.6 QPS  0.212 ms
+  ef=100  recall@10=0.9834    3883.0 QPS  0.258 ms
+  ef=150  recall@10=0.9927    2669.0 QPS  0.375 ms
+  ef=200  recall@10=0.9963    1852.7 QPS  0.540 ms
+  ef=300  recall@10=0.9988    1347.6 QPS  0.742 ms
+  ef=500  recall@10=0.9997     919.3 QPS  1.088 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-01/hnswlib-sift.json
+Run 2/4: hnswlib
+base 1000000 x 128, 10000 queries
+built in 90.5s
+  ef=10   recall@10=0.7087   20958.7 QPS  0.048 ms
+  ef=20   recall@10=0.8401   12927.2 QPS  0.077 ms
+  ef=40   recall@10=0.9278    7939.9 QPS  0.126 ms
+  ef=60   recall@10=0.9600    6015.6 QPS  0.166 ms
+  ef=80   recall@10=0.9754    4746.0 QPS  0.211 ms
+  ef=100  recall@10=0.9836    3843.8 QPS  0.260 ms
+  ef=150  recall@10=0.9928    2583.2 QPS  0.387 ms
+  ef=200  recall@10=0.9963    2050.1 QPS  0.488 ms
+  ef=300  recall@10=0.9988    1478.7 QPS  0.676 ms
+  ef=500  recall@10=0.9997     926.1 QPS  1.080 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-02/hnswlib-sift.json
+Run 2/4: fastvec
+base 1000000 x 128, 10000 queries
+loaded index from /mnt/d/data/sift.fvi in 5.277s
+loaded from disk, levels [1000000 62356 3994 246 26 2], degree min=1 max=32 mean=21.1
+level 0 reachable sets: 1, largest 1000000 of 1000000
+  ef=10   recall@10=0.7099   14161.5 QPS  p50 0.065  p99 0.139 ms
+  ef=20   recall@10=0.8395    9768.5 QPS  p50 0.089  p99 0.165 ms
+  ef=40   recall@10=0.9275    6441.7 QPS  p50 0.159  p99 0.276 ms
+  ef=60   recall@10=0.9599    4412.6 QPS  p50 0.227  p99 0.354 ms
+  ef=80   recall@10=0.9754    3468.0 QPS  p50 0.280  p99 0.418 ms
+  ef=100  recall@10=0.9835    2958.5 QPS  p50 0.354  p99 0.579 ms
+  ef=150  recall@10=0.9929    1985.8 QPS  p50 0.503  p99 0.756 ms
+  ef=200  recall@10=0.9963    1572.1 QPS  p50 0.678  p99 1.003 ms
+  ef=300  recall@10=0.9987    1070.1 QPS  p50 0.962  p99 1.466 ms
+  ef=500  recall@10=0.9997     664.3 QPS  p50 1.608  p99 5.445 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-02/fastvec-sift.json
+Run 3/4: fastvec
+base 1000000 x 128, 10000 queries
+loaded index from /mnt/d/data/sift.fvi in 5.647s
+loaded from disk, levels [1000000 62356 3994 246 26 2], degree min=1 max=32 mean=21.1
+level 0 reachable sets: 1, largest 1000000 of 1000000
+  ef=10   recall@10=0.7099   28110.4 QPS  p50 0.033  p99 0.066 ms
+  ef=20   recall@10=0.8395   17089.5 QPS  p50 0.057  p99 0.117 ms
+  ef=40   recall@10=0.9275    9627.2 QPS  p50 0.104  p99 0.243 ms
+  ef=60   recall@10=0.9599    6990.5 QPS  p50 0.147  p99 0.315 ms
+  ef=80   recall@10=0.9754    5480.9 QPS  p50 0.179  p99 0.324 ms
+  ef=100  recall@10=0.9835    4708.4 QPS  p50 0.209  p99 0.351 ms
+  ef=150  recall@10=0.9929    3330.4 QPS  p50 0.304  p99 0.477 ms
+  ef=200  recall@10=0.9963    2506.0 QPS  p50 0.418  p99 0.666 ms
+  ef=300  recall@10=0.9987    1732.2 QPS  p50 0.568  p99 0.834 ms
+  ef=500  recall@10=0.9997    1200.1 QPS  p50 0.867  p99 1.261 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-03/fastvec-sift.json
+Run 3/4: hnswlib
+base 1000000 x 128, 10000 queries
+built in 83.5s
+  ef=10   recall@10=0.7078   25698.1 QPS  0.039 ms
+  ef=20   recall@10=0.8377   21024.3 QPS  0.048 ms
+  ef=40   recall@10=0.9275   13060.3 QPS  0.077 ms
+  ef=60   recall@10=0.9598    9898.8 QPS  0.101 ms
+  ef=80   recall@10=0.9752    7765.6 QPS  0.129 ms
+  ef=100  recall@10=0.9835    7081.0 QPS  0.141 ms
+  ef=150  recall@10=0.9927    4926.4 QPS  0.203 ms
+  ef=200  recall@10=0.9962    3830.1 QPS  0.261 ms
+  ef=300  recall@10=0.9987    2627.2 QPS  0.381 ms
+  ef=500  recall@10=0.9997    1597.3 QPS  0.626 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-03/hnswlib-sift.json
+Run 4/4: hnswlib
+base 1000000 x 128, 10000 queries
+built in 82.7s
+  ef=10   recall@10=0.7083   35531.7 QPS  0.028 ms
+  ef=20   recall@10=0.8390   24728.1 QPS  0.040 ms
+  ef=40   recall@10=0.9276   14803.9 QPS  0.068 ms
+  ef=60   recall@10=0.9594   10718.3 QPS  0.093 ms
+  ef=80   recall@10=0.9753    8303.0 QPS  0.120 ms
+  ef=100  recall@10=0.9836    7021.4 QPS  0.142 ms
+  ef=150  recall@10=0.9927    4822.2 QPS  0.207 ms
+  ef=200  recall@10=0.9963    3778.9 QPS  0.265 ms
+  ef=300  recall@10=0.9987    2547.7 QPS  0.393 ms
+  ef=500  recall@10=0.9997    1594.6 QPS  0.627 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-04/hnswlib-sift.json
+Run 4/4: fastvec
+base 1000000 x 128, 10000 queries
+loaded index from /mnt/d/data/sift.fvi in 3.751s
+loaded from disk, levels [1000000 62356 3994 246 26 2], degree min=1 max=32 mean=21.1
+level 0 reachable sets: 1, largest 1000000 of 1000000
+  ef=10   recall@10=0.7099   28654.5 QPS  p50 0.034  p99 0.064 ms
+  ef=20   recall@10=0.8395   18499.8 QPS  p50 0.053  p99 0.096 ms
+  ef=40   recall@10=0.9275   10933.3 QPS  p50 0.091  p99 0.148 ms
+  ef=60   recall@10=0.9599    7752.3 QPS  p50 0.131  p99 0.197 ms
+  ef=80   recall@10=0.9754    5981.2 QPS  p50 0.169  p99 0.234 ms
+  ef=100  recall@10=0.9835    4921.4 QPS  p50 0.205  p99 0.299 ms
+  ef=150  recall@10=0.9929    3408.3 QPS  p50 0.322  p99 0.508 ms
+  ef=200  recall@10=0.9963    2577.3 QPS  p50 0.389  p99 0.549 ms
+  ef=300  recall@10=0.9987    1839.4 QPS  p50 0.567  p99 0.769 ms
+  ef=500  recall@10=0.9997    1060.8 QPS  p50 0.894  p99 1.295 ms
+wrote /home/phanindra_contributions/dev/fastvec/bin/baseline-ubuntu-20261021/sift/run-04/fastvec-sift.json

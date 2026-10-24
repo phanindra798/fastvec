@@ -1,0 +1,106 @@
+{
+  "timing_method": "search_only_repeated_sweeps_v2",
+  "implementation": "hnswlib",
+  "version": "0.8.0",
+  "dataset": "sift",
+  "base_count": 1000000,
+  "dim": 128,
+  "queries": 10000,
+  "k": 10,
+  "M": 16,
+  "ef_construction": 200,
+  "build_seconds": 83.53931169599991,
+  "threads": 1,
+  "sweep": [
+    {
+      "ef": 10,
+      "recall": 0.7078,
+      "qps": 25698.060377471706,
+      "ms_per_query": 0.03891344270000445,
+      "timed_queries": 10000,
+      "timed_seconds": 0.3891344270000445
+    },
+    {
+      "ef": 20,
+      "recall": 0.83765,
+      "qps": 21024.347192687135,
+      "ms_per_query": 0.047563902500041874,
+      "timed_queries": 10000,
+      "timed_seconds": 0.47563902500041877
+    },
+    {
+      "ef": 40,
+      "recall": 0.92754,
+      "qps": 13060.320139921172,
+      "ms_per_query": 0.07656780150000486,
+      "timed_queries": 10000,
+      "timed_seconds": 0.7656780150000486
+    },
+    {
+      "ef": 60,
+      "recall": 0.9598,
+      "qps": 9898.815172500153,
+      "ms_per_query": 0.10102219130003505,
+      "timed_queries": 10000,
+      "timed_seconds": 1.0102219130003505
+    },
+    {
+      "ef": 80,
+      "recall": 0.97518,
+      "qps": 7765.619211630438,
+      "ms_per_query": 0.12877273179997245,
+      "timed_queries": 10000,
+      "timed_seconds": 1.2877273179997246
+    },
+    {
+      "ef": 100,
+      "recall": 0.98351,
+      "qps": 7081.027657789135,
+      "ms_per_query": 0.14122243950000665,
+      "timed_queries": 10000,
+      "timed_seconds": 1.4122243950000666
+    },
+    {
+      "ef": 150,
+      "recall": 0.99274,
+      "qps": 4926.356871473625,
+      "ms_per_query": 0.20298976019998918,
+      "timed_queries": 10000,
+      "timed_seconds": 2.0298976019998918
+    },
+    {
+      "ef": 200,
+      "recall": 0.99624,
+      "qps": 3830.128218460169,
+      "ms_per_query": 0.2610878651999883,
+      "timed_queries": 10000,
+      "timed_seconds": 2.610878651999883
+    },
+    {
+      "ef": 300,
+      "recall": 0.99871,
+      "qps": 2627.1600565483827,
+      "ms_per_query": 0.38063916109999807,
+      "timed_queries": 10000,
+      "timed_seconds": 3.806391610999981
+    },
+    {
+      "ef": 500,
+      "recall": 0.99971,
+      "qps": 1597.2697765484074,
+      "ms_per_query": 0.6260683165000046,
+      "timed_queries": 10000,
+      "timed_seconds": 6.260683165000046
+    }
+  ],
+  "env": {
+    "captured_utc": "2026-10-21T15:07:50.188967+00:00",
+    "source_state": "clean",
+    "os": "Linux/x86_64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12650H",
+    "python": "3.12.3",
+    "numpy": "2.5.2",
+    "kernel": "6.18.54.1-microsoft-standard-WSL2",
+    "commit": "f7d70d0"
+  }
+}

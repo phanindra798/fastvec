@@ -1,0 +1,32 @@
+[
+  {
+    "ef": 100,
+    "argv": [
+      "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+      "-test.run=^$",
+      "-test.bench=BenchmarkHNSWSearch/ef100$",
+      "-test.benchtime=100000x",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.timeout=10m",
+      "-test.cpuprofile=bin/search-stability-ac-20261022/profiles/ef100.cpu"
+    ],
+    "finished_utc": "2026-10-22T07:52:24.141401+00:00",
+    "returncode": 0
+  },
+  {
+    "ef": 500,
+    "argv": [
+      "/home/phanindra_contributions/dev/fastvec/bin/search-stability.test",
+      "-test.run=^$",
+      "-test.bench=BenchmarkHNSWSearch/ef500$",
+      "-test.benchtime=30000x",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.timeout=10m",
+      "-test.cpuprofile=bin/search-stability-ac-20261022/profiles/ef500.cpu"
+    ],
+    "finished_utc": "2026-10-22T07:53:20.559664+00:00",
+    "returncode": 0
+  }
+]
