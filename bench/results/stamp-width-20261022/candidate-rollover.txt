@@ -1,0 +1,11 @@
+goos: linux
+goarch: amd64
+pkg: github.com/phanindra798/fastvec/internal/index
+cpu: 12th Gen Intel(R) Core(TM) i7-12650H
+BenchmarkWorkspaceEpoch/amortized         	419948982	         2.711 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWorkspaceEpoch/amortized         	446363449	         2.855 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWorkspaceEpoch/amortized         	438652370	         2.754 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWorkspaceEpoch/rollover          	   30013	     40473 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWorkspaceEpoch/rollover          	   30099	     40038 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWorkspaceEpoch/rollover          	   30284	     39831 ns/op	       0 B/op	       0 allocs/op
+PASS

@@ -9,8 +9,8 @@ import "github.com/phanindra798/fastvec/internal/topk"
 // Each search borrows one from a sync.Pool and puts it back, which keeps
 // allocation off the query path without any locking.
 type workspace struct {
-	stamp []uint32 // one per node
-	epoch uint32   // this search's marker
+	stamp []uint16 // Two bytes per node; clear when the 16-bit epoch wraps.
+	epoch uint16   // this search's marker
 	cand  candidates
 	res   *topk.Collector
 	dist  distCounter
@@ -22,20 +22,20 @@ type workspace struct {
 }
 
 func newWorkspace(nodes int) *workspace {
-	return &workspace{stamp: make([]uint32, nodes)}
+	return &workspace{stamp: make([]uint16, nodes)}
 }
 
 // begin readies the workspace for a new search over nodes, keeping whatever
 // memory it already had.
 func (w *workspace) begin(nodes, ef int) {
 	if len(w.stamp) < nodes {
-		w.stamp = make([]uint32, nodes)
+		w.stamp = make([]uint16, nodes)
 		w.epoch = 0
 	}
 
 	w.epoch++
 	if w.epoch == 0 {
-		// Wrapped after 4 billion searches. Every stamp would now read as
+		// Wrapped after 65,535 layer searches. Old epoch-one stamps would read as
 		// visited, so clear them and start again.
 		for i := range w.stamp {
 			w.stamp[i] = 0

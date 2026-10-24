@@ -1,0 +1,337 @@
+{
+  "started_utc": "2026-10-22T12:57:43.398250+00:00",
+  "status": "complete",
+  "binaries": {
+    "baseline": {
+      "path": "/home/phanindra_contributions/dev/fastvec/bin/stamps32.test",
+      "sha256": "114da4203d773a6326b8a5a5071023a1e779a87ab63d01e5100869784def1ab8"
+    },
+    "candidate": {
+      "path": "/home/phanindra_contributions/dev/fastvec/bin/stamps16.test",
+      "sha256": "54e78073cbf9a3a77bf24bcdfffacea0d806e990b2dc30914ff59cb2929db8c8"
+    }
+  },
+  "candidate_source_sha256": "1d02a06061bd21b6ed74f0bdda654ab669e54827f19eeb5a9ce0361d791238ad",
+  "baseline_source_sha256": "5453c90d83f15c5749939b15489f4d2bceab78bce2afe8b5ef804dee5d44bb29",
+  "test_source_sha256": "895e5bfa9cc282772014f4462a2ceae5d6f952de2b7fc18905d45efba98a3a22",
+  "environment": {
+    "FASTVEC_BENCH_INDEX": "/mnt/d/data/sift.fvi",
+    "FASTVEC_BENCH_QUERIES": "/mnt/d/data/sift/sift_query.fvecs",
+    "GOMAXPROCS": "1"
+  },
+  "runs": [
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps32.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T12:58:18.409938+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 254585.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 984071.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps16.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T12:58:59.573188+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 231505.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 972536.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps16.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T12:59:39.912741+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 226972.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 1005225.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps32.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T13:00:20.436349+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 243148.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 974585.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps32.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T13:01:00.356240+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 234569.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 981362.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps16.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T13:01:40.698784+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 231459.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 934760.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps16.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T13:02:19.988848+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 222606.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 979600.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "argv": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/phanindra_contributions/dev/fastvec/bin/stamps32.test",
+        "-test.run=^$",
+        "-test.bench=BenchmarkHNSWSearch",
+        "-test.benchtime=10000x",
+        "-test.count=1",
+        "-test.cpu=1",
+        "-test.timeout=10m"
+      ],
+      "before": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "started_utc": "2026-10-22T13:02:59.425309+00:00",
+      "after": {
+        "AC": "Online",
+        "Plan": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+      },
+      "returncode": 0,
+      "metrics": {
+        "100": {
+          "ns": 234091.0,
+          "bytes": 896.0,
+          "allocs": 1.0
+        },
+        "500": {
+          "ns": 977138.0,
+          "bytes": 4096.0,
+          "allocs": 1.0
+        }
+      }
+    }
+  ],
+  "baseline_fingerprints": [
+    "FINGERPRINT ef=100 queries=10000 sha256=c28b35db38dc58d5bf15b96f04b90d8aacbd3424f5089216ed844e9fa1bcaa1c",
+    "FINGERPRINT ef=500 queries=10000 sha256=8c3cc90a42d800dc109b575d8ef6f45e9e495c3afb90520df2c3699af106a20a"
+  ],
+  "candidate_fingerprints": [
+    "FINGERPRINT ef=100 queries=10000 sha256=c28b35db38dc58d5bf15b96f04b90d8aacbd3424f5089216ed844e9fa1bcaa1c",
+    "FINGERPRINT ef=500 queries=10000 sha256=8c3cc90a42d800dc109b575d8ef6f45e9e495c3afb90520df2c3699af106a20a"
+  ],
+  "finished_utc": "2026-10-22T13:03:59.723716+00:00"
+}

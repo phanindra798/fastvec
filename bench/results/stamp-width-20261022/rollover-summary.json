@@ -1,0 +1,10 @@
+{
+  "baseline": {
+    "amortized": 2.155,
+    "rollover": 90620.0
+  },
+  "candidate": {
+    "amortized": 2.754,
+    "rollover": 40038.0
+  }
+}

@@ -1,0 +1,5 @@
+=== RUN   TestSearchDatasetFingerprint
+FINGERPRINT ef=100 queries=10000 sha256=c28b35db38dc58d5bf15b96f04b90d8aacbd3424f5089216ed844e9fa1bcaa1c
+FINGERPRINT ef=500 queries=10000 sha256=8c3cc90a42d800dc109b575d8ef6f45e9e495c3afb90520df2c3699af106a20a
+--- PASS: TestSearchDatasetFingerprint (16.70s)
+PASS

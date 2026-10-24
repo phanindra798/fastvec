@@ -64,6 +64,12 @@ For the benchmark CLI, select `-index-load-policy auto` (default) or
 `-index-load-policy single-pass`. Results record the requested policy; it only
 affects loading an existing index cache.
 
+[16-bit visited-node stamps](docs/stamp-width-20261022.md) halve the stamp array
+from 4 MB to 2 MB per million-node search workspace. Four local alternating
+pairs observed 4.0% lower median query time at ef=100, with no clear gain at
+ef=500. Epoch rollover now clears the array every 65,535 layer searches; the
+report documents that latency tradeoff and correctness checks.
+
 No third-party libraries on the query path. The `.fvecs` parser, distance
 kernels, top-k heap, graph construction, search, and on-disk format are all in
 this repository. hnswlib is used only as a benchmark opponent.

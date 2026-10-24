@@ -1,0 +1,7 @@
+ok  	github.com/phanindra798/fastvec/cmd/fastvec-bench	11.860s
+ok  	github.com/phanindra798/fastvec/cmd/fastvec-subset	0.006s
+?   	github.com/phanindra798/fastvec/internal/benchenv	[no test files]
+ok  	github.com/phanindra798/fastvec/internal/distance	0.029s
+ok  	github.com/phanindra798/fastvec/internal/fvecs	0.007s
+ok  	github.com/phanindra798/fastvec/internal/index	331.176s
+ok  	github.com/phanindra798/fastvec/internal/topk	0.003s
