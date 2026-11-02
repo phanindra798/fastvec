@@ -20,7 +20,9 @@ import (
 // a layer and repeats. The sparse upper layers cross the space in a few hops,
 // the bottom one does the fine-grained work.
 //
-// Stage 2. Neighbour selection is still nearest-M; the heuristic is stage 3.
+// New nodes choose neighbours with the paper's heuristic, which keeps the graph
+// in one piece; Params.NearestM builds the simpler stage-2 version for
+// comparison. See decisions.md.
 type HNSW struct {
 	dim  int
 	data []float32
@@ -511,6 +513,13 @@ func (h *HNSW) descend(q []float32, ep int32, level int, w *workspace) int32 {
 // skip leaves one node out of the results, used while building so a vector
 // doesn't become its own neighbour. Pass -1 when querying.
 func (h *HNSW) searchLayer(q []float32, ep int32, ef, level int, skip int32, w *workspace) []topk.Result {
+	h.fillLayer(q, ep, ef, level, skip, w)
+	return w.res.Results()
+}
+
+// fillLayer runs the search and leaves the best ef nodes in w.res, for a caller
+// that wants fewer of them than searchLayer would copy out.
+func (h *HNSW) fillLayer(q []float32, ep int32, ef, level int, skip int32, w *workspace) {
 	// There cannot be more results than nodes. Bound scratch allocation even
 	// when a caller or persisted index requests an enormous search width.
 	if ef > h.Len() {
@@ -552,8 +561,6 @@ func (h *HNSW) searchLayer(q []float32, ep int32, ef, level int, skip int32, w *
 			}
 		}
 	}
-
-	return w.res.Results()
 }
 
 func (h *HNSW) measure(q []float32, id int32, w *workspace) float32 {
@@ -581,14 +588,13 @@ func (h *HNSW) Search(q []float32, k int) ([]topk.Result, error) {
 	for lc := h.maxLevel; lc > 0; lc-- {
 		ep = h.descend(q, ep, lc, w)
 	}
-	res := h.searchLayer(q, ep, ef, 0, -1, w)
+	h.fillLayer(q, ep, ef, 0, -1, w)
+	// Copy out only the k the caller asked for. The other ef-k stay in the
+	// workspace, which the next search resets.
+	res := w.res.Best(k)
 
 	h.distTotal.Add(w.dist.total())
 	h.pool.Put(w)
-
-	if len(res) > k {
-		res = res[:k]
-	}
 	return res, nil
 }
 

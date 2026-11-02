@@ -157,3 +157,33 @@ to obtain this query-time layout.
 
 Follow-up: [loader profiling](load-profiling.md) measures two loading approaches
 that were reverted because they did not improve the time/memory tradeoff.
+
+## Result copy bounded by k (retained) — 2026-11-02
+
+`Search` used to copy and sort all ef results from the layer search, then keep
+the first k. It now sorts the workspace collector in place and copies only k
+(`topk.Collector.Best`). The collector is reset by the next search, so breaking
+its heap order costs nothing. Construction still receives every result.
+
+The remaining allocation per query is the caller-owned result slice, which now
+scales with k rather than ef:
+
+| ef | Before B/query | After B/query | Allocations |
+|---:|---:|---:|---:|
+| 100 | 896 | 80 | 1 → 1 |
+| 500 | 4,097 | 81 | 1 → 1 |
+
+Measured with the new `BenchmarkSyntheticSearch` (20,000 random 32-dimensional
+vectors, k=10, one CPU) in three alternating before/after pairs on a shared
+4-CPU cloud Linux VM. Byte counts were identical in every pair. Timing was not
+consistent: same-binary samples ranged 198–250 µs at ef=100, after was faster
+in two of three pairs at ef=100 and one of three at ef=500. **No throughput
+change is claimed**; this environment cannot resolve one, and no SIFT1M pair
+has been run.
+
+`TestSearchMatchesFullLayerResults` checks that every result, IDs and float32
+distance bits, equals the first k of the previous full copy, for k from 1 to
+50 and ef from 1 to 300. `TestBestMatchesResults` covers ties, oversized and
+negative counts, and collector reuse after Reset. The SIFT1M fingerprint test
+(`TestSearchDatasetFingerprint`) should be rerun locally before the next
+published comparison.

@@ -79,16 +79,32 @@ func (c *Collector) Add(id int32, dist float32) {
 func (c *Collector) Results() []Result {
 	out := make([]Result, len(c.items))
 	copy(out, c.items)
-	slices.SortFunc(out, func(a, b Result) int {
-		if Before(a, b) {
-			return -1
-		}
-		if Before(b, a) {
-			return 1
-		}
-		return 0
-	})
+	slices.SortFunc(out, compare)
 	return out
+}
+
+// Best returns the n nearest kept items, nearest first, without copying the
+// rest. Results copies and sorts all k, which a search with ef=500 and k=10
+// mostly throws away.
+//
+// It sorts the collector's own storage, which breaks the heap order. Call
+// Reset before adding to the collector again.
+func (c *Collector) Best(n int) []Result {
+	slices.SortFunc(c.items, compare)
+	n = max(0, min(n, len(c.items)))
+	out := make([]Result, n)
+	copy(out, c.items[:n])
+	return out
+}
+
+func compare(a, b Result) int {
+	if Before(a, b) {
+		return -1
+	}
+	if Before(b, a) {
+		return 1
+	}
+	return 0
 }
 
 // up and down maintain the heap: every node ranks better than its children, so

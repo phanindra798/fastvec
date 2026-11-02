@@ -2,6 +2,8 @@ package index
 
 import (
 	"bytes"
+	"fmt"
+	"math"
 	"math/rand"
 	"testing"
 	"time"
@@ -354,5 +356,73 @@ func TestHNSWConcurrentSearchMatchesSerial(t *testing.T) {
 		if bad := <-done; bad != 0 {
 			t.Errorf("worker saw %d queries disagree with the serial answer", bad)
 		}
+	}
+}
+
+// Search copies out only k results instead of all ef. The answer must be
+// exactly the first k of the full layer search, IDs and distance bits alike.
+func TestSearchMatchesFullLayerResults(t *testing.T) {
+	r := rand.New(rand.NewSource(91))
+	set := randomSet(r, 3000, 16)
+	h, err := BuildHNSW(set, Params{M: 8, EfConstruct: 60, EfSearch: 60, Seed: 3})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, ef := range []int{1, 10, 60, 300} {
+		h.SetEfSearch(ef)
+		for _, k := range []int{1, 5, 10, 50} {
+			for qi := 0; qi < 100; qi++ {
+				q := randomSet(r, 1, 16).At(0)
+
+				got, err := h.Search(q, k)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// The path Search used before: every result copied, then cut.
+				w := newWorkspace(h.Len())
+				ep := h.entry
+				for lc := h.maxLevel; lc > 0; lc-- {
+					ep = h.descend(q, ep, lc, w)
+				}
+				want := h.searchLayer(q, ep, max(ef, k), 0, -1, w)
+				if len(want) > k {
+					want = want[:k]
+				}
+
+				if len(got) != len(want) {
+					t.Fatalf("ef=%d k=%d: got %d results, want %d", ef, k, len(got), len(want))
+				}
+				for i := range want {
+					if got[i].ID != want[i].ID || math.Float32bits(got[i].Dist) != math.Float32bits(want[i].Dist) {
+						t.Fatalf("ef=%d k=%d position %d: got %v, want %v", ef, k, i, got[i], want[i])
+					}
+				}
+			}
+		}
+	}
+}
+
+// Synthetic, so it runs anywhere. Reports bytes per query, which now track k
+// rather than ef. Timing from this is not a SIFT measurement.
+func BenchmarkSyntheticSearch(b *testing.B) {
+	r := rand.New(rand.NewSource(93))
+	set := randomSet(r, 20000, 32)
+	h, err := BuildHNSW(set, Params{M: 16, EfConstruct: 100, Seed: 1})
+	if err != nil {
+		b.Fatal(err)
+	}
+	queries := randomSet(r, 1000, 32)
+	for _, ef := range []int{100, 500} {
+		b.Run(fmt.Sprintf("ef%d", ef), func(b *testing.B) {
+			h.SetEfSearch(ef)
+			b.ReportAllocs()
+			for i := 0; b.Loop(); i++ {
+				if _, err := h.Search(queries.At(i%queries.Len()), 10); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }

@@ -155,3 +155,75 @@ func BenchmarkAdd(b *testing.B) {
 		c.Add(int32(i), dists[i%len(dists)])
 	}
 }
+
+// Best must return exactly the first n of what Results returns, ties included,
+// and the collector must work normally again after a Reset.
+func TestBestMatchesResults(t *testing.T) {
+	r := rand.New(rand.NewSource(11))
+
+	for _, n := range []int{0, 1, 7, 100, 1000} {
+		for _, k := range []int{1, 10, 100} {
+			for _, take := range []int{-1, 0, 1, 5, 10, 150} {
+				c := New(k)
+				items := make([]Result, n)
+				for i := range items {
+					items[i] = Result{ID: int32(i), Dist: float32(r.Intn(15))}
+					c.Add(items[i].ID, items[i].Dist)
+				}
+				all := c.Results()
+				got := c.Best(take)
+				want := all[:max(0, min(take, len(all)))]
+				if len(got) != len(want) {
+					t.Fatalf("n=%d k=%d take=%d: got %d results, want %d", n, k, take, len(got), len(want))
+				}
+				for i := range want {
+					if got[i] != want[i] {
+						t.Fatalf("n=%d k=%d take=%d: position %d got %v, want %v", n, k, take, i, got[i], want[i])
+					}
+				}
+
+				c.Reset()
+				for _, it := range items {
+					c.Add(it.ID, it.Dist)
+				}
+				again := c.Results()
+				for i := range again {
+					if again[i] != all[i] {
+						t.Fatalf("n=%d k=%d: collector wrong after Best and Reset", n, k)
+					}
+				}
+			}
+		}
+	}
+}
+
+// Best hands back its own slice, so changing it cannot reach the collector.
+func TestBestReturnsCopy(t *testing.T) {
+	c := New(3)
+	c.Add(1, 1)
+	c.Add(2, 2)
+	got := c.Best(2)
+	got[0] = Result{ID: 99, Dist: -1}
+	if again := c.Best(2); again[0].ID != 1 {
+		t.Fatalf("Best shares storage with the collector: %v", again)
+	}
+}
+
+// One allocation, holding n results however many the collector kept.
+func TestBestAllocatesOnlyN(t *testing.T) {
+	if testing.CoverMode() != "" {
+		t.Skip("coverage instrumentation allocates")
+	}
+	c := New(500)
+	for i := 0; i < 2000; i++ {
+		c.Add(int32(i), float32(i%97))
+	}
+	allocs := testing.AllocsPerRun(100, func() {
+		if got := c.Best(10); len(got) != 10 {
+			t.Fatalf("got %d results", len(got))
+		}
+	})
+	if allocs != 1 {
+		t.Fatalf("%.1f allocations, want 1", allocs)
+	}
+}
