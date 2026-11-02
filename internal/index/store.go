@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/rand"
 	"sync"
 )
 
@@ -224,7 +223,6 @@ func LoadHNSWWithOptions(r io.Reader, opts LoadOptions) (*HNSW, error) {
 		singleLayer: head[10]&flagSingleLayer != 0,
 		nearestM:    head[10]&flagNearestM != 0,
 		seed:        seed,
-		rng:         rand.New(rand.NewSource(seed)),
 	}
 	h.efSearch.Store(int64(head[7]))
 	h.pool = sync.Pool{New: func() any { return newWorkspace(count) }}

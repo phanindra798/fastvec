@@ -9,12 +9,14 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	"github.com/phanindra798/fastvec/internal/atomicfile"
 	"github.com/phanindra798/fastvec/internal/fvecs"
 	"github.com/phanindra798/fastvec/internal/index"
 )
@@ -108,45 +110,39 @@ func run(src, dst, gtPath string, nBase, nQuery, k, workers int) error {
 	return nil
 }
 
+// Both writers go through a temporary file, so a failed write cannot leave a
+// truncated subset or ground truth that later tests would read as real.
 func writeFvecs(path string, set *fvecs.Float) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+	return atomicfile.Write(path, func(w io.Writer) error {
+		buf := make([]byte, 4+set.Dim*4)
+		binary.LittleEndian.PutUint32(buf, uint32(set.Dim))
 
-	buf := make([]byte, 4+set.Dim*4)
-	binary.LittleEndian.PutUint32(buf, uint32(set.Dim))
-
-	for i := 0; i < set.Len(); i++ {
-		v := set.At(i)
-		for j, x := range v {
-			binary.LittleEndian.PutUint32(buf[4+j*4:], math.Float32bits(x))
+		for i := 0; i < set.Len(); i++ {
+			v := set.At(i)
+			for j, x := range v {
+				binary.LittleEndian.PutUint32(buf[4+j*4:], math.Float32bits(x))
+			}
+			if _, err := w.Write(buf); err != nil {
+				return err
+			}
 		}
-		if _, err := f.Write(buf); err != nil {
-			return err
-		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func writeIvecs(path string, dim int, ids []int32) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+	return atomicfile.Write(path, func(w io.Writer) error {
+		buf := make([]byte, 4+dim*4)
+		binary.LittleEndian.PutUint32(buf, uint32(dim))
 
-	buf := make([]byte, 4+dim*4)
-	binary.LittleEndian.PutUint32(buf, uint32(dim))
-
-	for i := 0; i < len(ids)/dim; i++ {
-		for j, id := range ids[i*dim : (i+1)*dim] {
-			binary.LittleEndian.PutUint32(buf[4+j*4:], uint32(id))
+		for i := 0; i < len(ids)/dim; i++ {
+			for j, id := range ids[i*dim : (i+1)*dim] {
+				binary.LittleEndian.PutUint32(buf[4+j*4:], uint32(id))
+			}
+			if _, err := w.Write(buf); err != nil {
+				return err
+			}
 		}
-		if _, err := f.Write(buf); err != nil {
-			return err
-		}
-	}
-	return nil
+		return nil
+	})
 }

@@ -247,3 +247,33 @@ func TestValidateDatasetAcceptsBoundaryK(t *testing.T) {
 		}
 	}
 }
+
+// A save that fails used to leave whatever had been written at the cache path,
+// and the next run then failed to load it instead of rebuilding. A negative
+// search width cannot be stored, so Save rejects it after the build succeeds.
+func TestFailedSaveLeavesNoCache(t *testing.T) {
+	base := &fvecs.Float{Dim: 2, Data: []float32{0, 0, 1, 2, 5, 6}}
+	p := index.Params{M: 2, EfConstruct: 4, EfSearch: -1, Seed: 42}
+	dir := t.TempDir()
+	path := filepath.Join(dir, "tiny.fvi")
+
+	if _, _, err := loadOrBuild(base, p, path); err == nil {
+		t.Fatal("expected the save to fail")
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("failed save left %d files, first %s", len(entries), entries[0].Name())
+	}
+
+	// With a valid setting the same path now builds and saves normally.
+	p.EfSearch = 4
+	if _, _, err := loadOrBuild(base, p, path); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal(err)
+	}
+}

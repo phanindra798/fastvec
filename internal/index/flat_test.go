@@ -145,3 +145,32 @@ func BenchmarkFlatSearch(b *testing.B) {
 		}
 	}
 }
+
+// An empty or dimensionless set used to panic with a division by zero in Len.
+func TestFlatEmptyAndNilSets(t *testing.T) {
+	for name, set := range map[string]*fvecs.Float{
+		"nil":            nil,
+		"zero dimension": {Dim: 0, Data: []float32{1, 2}},
+		"no vectors":     {Dim: 4},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f := NewFlat(set)
+			if f.Len() != 0 {
+				t.Fatalf("Len = %d, want 0", f.Len())
+			}
+			q := make([]float32, f.Dim())
+			for _, search := range []func() ([]topk.Result, error){
+				func() ([]topk.Result, error) { return f.Search(q, 3) },
+				func() ([]topk.Result, error) { return f.SearchN(q, 3, 4) },
+			} {
+				got, err := search()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(got) != 0 {
+					t.Fatalf("got %d results from an empty index", len(got))
+				}
+			}
+		})
+	}
+}

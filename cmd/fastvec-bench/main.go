@@ -17,6 +17,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/phanindra798/fastvec/internal/atomicfile"
 	"github.com/phanindra798/fastvec/internal/benchenv"
 	"github.com/phanindra798/fastvec/internal/distance"
 	"github.com/phanindra798/fastvec/internal/fvecs"
@@ -268,14 +269,11 @@ func loadOrBuildWithOptions(base *fvecs.Float, p index.Params, path string, opts
 	}
 	build := time.Since(start)
 
+	// Written through a temporary file, so a failed or interrupted save
+	// leaves no truncated cache for the next run to trip over.
 	if path != "" {
-		f, err := os.Create(path)
-		if err != nil {
-			return nil, 0, err
-		}
-		defer f.Close()
-		if err := h.Save(f); err != nil {
-			return nil, 0, err
+		if err := atomicfile.Write(path, h.Save); err != nil {
+			return nil, 0, fmt.Errorf("saving index to %s: %w", path, err)
 		}
 		fmt.Printf("saved index to %s\n", path)
 	}

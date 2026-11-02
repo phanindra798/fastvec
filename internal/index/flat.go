@@ -17,13 +17,24 @@ type Flat struct {
 	data []float32
 }
 
+// NewFlat searches set in place rather than copying it, so the caller must not
+// change the vectors while the index is in use. A nil or zero-dimension set
+// gives an empty index instead of a division by zero in Len.
 func NewFlat(set *fvecs.Float) *Flat {
+	if set == nil {
+		return &Flat{}
+	}
 	return &Flat{dim: set.Dim, data: set.Data}
 }
 
 func (f *Flat) Dim() int { return f.dim }
 
-func (f *Flat) Len() int { return len(f.data) / f.dim }
+func (f *Flat) Len() int {
+	if f.dim <= 0 {
+		return 0
+	}
+	return len(f.data) / f.dim
+}
 
 // Search returns the k nearest vectors to q, nearest first. Asking for more
 // than the index holds just returns everything.

@@ -110,3 +110,26 @@ reports no known vulnerabilities. The updated commit still needs a new CI run.
 The Go audit passed in that run with no reachable vulnerabilities; it reported
 one module-level advisory in unused code. Audit results reflect the database
 and platform at the time of each run, not a permanent security guarantee.
+
+## Atomic writes for caches and generated datasets — 2026-11-02
+
+`fastvec-bench` wrote the index cache directly to its final path and deferred
+`Close` without checking its error. A failed or interrupted save left a
+truncated `.fvi`; the next run refused to load it rather than rebuilding, and a
+write error reported only by `Close` was lost. `fastvec-subset` wrote the subset
+and its ground truth the same way.
+
+Both now use `internal/atomicfile`: write through a buffer to a temporary file
+in the target directory, flush, sync, close, then rename over the target. Any
+error removes the temporary file and leaves the previous file untouched.
+`TestFailedSaveLeavesNoCache` forces a save failure after a successful build;
+it fails against the previous code and passes now. Package tests cover
+creation, replacement, and failure with and without an existing file.
+
+Also in this change: `NewFlat` accepts a nil or zero-dimension set as an empty
+index instead of dividing by zero in `Len`, and loaded indexes no longer
+allocate an unused level-assignment random generator.
+
+Validation: default, purego and diagnostic short suites, vet and builds, the
+short race suite, and Windows and darwin/arm64 cross-compilation, on Linux
+with Go 1.26.9. Windows runtime behaviour of the rename is left to CI.
